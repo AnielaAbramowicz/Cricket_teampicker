@@ -84,6 +84,7 @@ def update_team_data(team_data : dict, event : AuctionEvent, player_data : pd.Da
 
 def calc_evaluations(player_data : pd.DataFrame, player_weights : list, team_data : dict) -> pd.DataFrame:
     """
+    #this is a test comment to see if im gonna punch a wall because of github
     Update the evaluations of players based on the given player data, player weights and team data.
 
     Parameters:
