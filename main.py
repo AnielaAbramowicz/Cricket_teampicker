@@ -123,7 +123,7 @@ def calc_evaluations(player_data : pd.DataFrame, pool_data : dict, constraint_da
 
     # for wicketkeepers
     if constraint_data['wicketkeeper'] <= team_data['wicketkeeper']:
-        wweight_dict['Wicket-Keeper'] = 1
+        weight_dict['Wicket-Keeper'] = 1
     else:
         r_wicketkeeper = (constraint_data['wicketkeeper'] - team_data['wicketkeeper'])/(pool_data['wicketkeeper'] -  (constraint_data['wicketkeeper'] - team_data['wicketkeeper']))
         weight_dict['Wicket-Keeper'] = np.exp(r_wicketkeeper)
