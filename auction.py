@@ -17,6 +17,15 @@ class Auction:
     def __init__(self, player_data : pd.DataFrame):
         self.player_data = player_data.copy()
 
+        self.pool_data = {
+            'batters' : self.player_data['TYPE'].value_counts()['Batter'],
+            'bowlers' : self.player_data['TYPE'].value_counts()['Bowler'],
+            'wicketkeepers' : self.player_data['TYPE'].value_counts()['Wicket-Keeper'],
+            'allrounders' : self.player_data['TYPE'].value_counts()['All-Rounder'],
+            'foreign' : self.player_data['OverseasIndian'].value_counts()['Foreign'],
+            'indian' : self.player_data['OverseasIndian'].value_counts()['Indian'],
+        }
+
         self.rng = np.random.default_rng(seed=420)
 
         # Set the current player
@@ -66,6 +75,17 @@ class Auction:
 
         # Update the player data
         self.player_data = self.player_data.drop(self.current_player, axis = 0) # Remove the player from the pool
+
+        # Update the role counts
+        role = self.player_data.loc[self.current_player]['TYPE']
+        self.pool_data[role] -= 1
+
+        # Update the foreign/indian counts
+        origin = self.player_data.loc[self.current_player]['OverseasIndian']
+        if origin == 'Overseas':
+            self.pool_data['foreign'] -= 1
+        else:
+            self.pool_data['indian'] -= 1
 
         # Pick a new player
         self.current_player = self.player_data.index[self.rng.integers(0, len(self.player_data))]
