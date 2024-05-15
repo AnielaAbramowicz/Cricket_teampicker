@@ -99,29 +99,41 @@ def calc_evaluations(player_data : pd.DataFrame, pool_data : dict, constraint_da
     """
     #the weight of the positional constraint is as follow:
     # w = exp((how many players we still need)/(how many players are left - how many players we need))
-    # we only need to calculate the weights for batsmen, bowlers and wicketkeepers as all rounders count as both batsmen and bowlers
-    # wicketkeepers also count as batsmen
-    result = []
-    # for batsmen
-    if constraint_data['batsmen'] <= (team_data['batsmen'] + pool_data['wicketkeepers'] + pool_data['allrounders']):
-        w_batsmen = 1
-    else:
-        r_batsmen = (constraint_data['batsmen'] - (team_data['batsmen'] + pool_data['wicketkeepers'] + pool_data['allrounders']))/(pool_data['batsmen'] + pool_data['wicketkeepers'] + pool_data['allrounders'] -  (constraint_data['batsmen'] - (team_data['batsmen'] + pool_data['wicketkeepers'] + pool_data['allrounders'])))
-        w_batsmen = np.exp(r_batsmen)
+    # we only need to calculate the weights for batters, bowlers and wicketkeepers as all rounders count as both batters and bowlers
+    # wicketkeepers also count as batters
 
+    weight_dict = {
+        'Batter' : 0,
+        'Bowler' : 0,
+        'Wicket-Keeper' : 0,
+        'All-Rounder' : 0
+    }
+    # for batters
+    if constraint_data['batters'] <= (team_data['batters'] + pool_data['wicketkeepers'] + pool_data['allrounders']):
+        weight_dict['Batter']= 1
+    else:
+        r_batters = (constraint_data['batters'] - (team_data['batters'] + pool_data['wicketkeepers'] + pool_data['allrounders']))/(pool_data['batters'] + pool_data['wicketkeepers'] + pool_data['allrounders'] -  (constraint_data['batters'] - (team_data['batters'] + pool_data['wicketkeepers'] + pool_data['allrounders'])))
+        weight_dict['Batter'] = np.exp(r_batters)
     # for bowlers
     if constraint_data['bowlers'] <= (team_data['bowlers'] + pool_data['allrounders']):
-        w_b = 1
+        weight_dict['Bowler'] = 1
     else:
         r_bowler = (constraint_data['bowlers'] - (team_data['bowlers'] + pool_data['allrounders']))/(team_data['bowlers'] + pool_data['allrounders']  -  (constraint_data['bowlers'] - (team_data['bowlers'] + pool_data['allrounders'])))
-        w_bowler = np.exp(r_bowler)
+        weight_dict['Bowler'] = np.exp(r_bowler)
 
     # for wicketkeepers
     if constraint_data['wicketkeeper'] <= team_data['wicketkeeper']:
-        w_wicketkeeper = 1
+        wweight_dict['Wicket-Keeper'] = 1
     else:
         r_wicketkeeper = (constraint_data['wicketkeeper'] - team_data['wicketkeeper'])/(pool_data['wicketkeeper'] -  (constraint_data['wicketkeeper'] - team_data['wicketkeeper']))
-        w_wicketkeeper = np.exp(r_wicketkeeper)
+        weight_dict['Wicket-Keeper'] = np.exp(r_wicketkeeper)
+
+    weight_dict['All-Rounder'] = np.max(np.exp(r_batters),np.exp(r_bowler))
+
+    return  (player_data['Performance'] * weight_dict[player_data['Type']]).tolist()
+
+    
+
 
 
     
