@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from auction import Auction, AuctionEvent
 
 def update_constraints(constraint_data: dict, event : AuctionEvent, player_data : pd.DataFrame) -> dict:
@@ -82,19 +83,60 @@ def update_team_data(team_data : dict, event : AuctionEvent, player_data : pd.Da
 
     return new_team_data 
 
-def calc_evaluations(player_data : pd.DataFrame, player_weights : list, team_data : dict) -> pd.DataFrame:
+def calc_evaluations(player_data : pd.DataFrame, pool_data : dict, constraint_data : dict, team_data : dict) -> list:
     """
+    #this is a test comment to see if im gonna punch a wall because of github
     Update the evaluations of players based on the given player data, player weights and team data.
 
     Parameters:
     player_data (pd.DataFrame): The data frame containing player information.
-    player_weights (list): The list of weights for each player.
+    pool_data (dict): the dictionary containing how many players are left in the pool at each position
+    constraint_data (dict): the dictionary containing how many players we need at each position
     team_data (dict): The dictionary containing current team composition data.
 
     Returns:
     list: A list of player evaluations.
     """
-    pass
+    #the weight of the positional constraint is as follow:
+    # w = exp((how many players we still need)/(how many players are left - how many players we need))
+    # we only need to calculate the weights for batters, bowlers and wicketkeepers as all rounders count as both batters and bowlers
+    # wicketkeepers also count as batters
+
+    weight_dict = {
+        'Batter' : 0,
+        'Bowler' : 0,
+        'Wicket-Keeper' : 0,
+        'All-Rounder' : 0
+    }
+    # for batters
+    if constraint_data['batters'] <= (team_data['batters'] + pool_data['wicketkeepers'] + pool_data['allrounders']):
+        weight_dict['Batter']= 1
+    else:
+        r_batters = (constraint_data['batters'] - (team_data['batters'] + pool_data['wicketkeepers'] + pool_data['allrounders']))/(pool_data['batters'] + pool_data['wicketkeepers'] + pool_data['allrounders'] -  (constraint_data['batters'] - (team_data['batters'] + pool_data['wicketkeepers'] + pool_data['allrounders'])))
+        weight_dict['Batter'] = np.exp(r_batters)
+    # for bowlers
+    if constraint_data['bowlers'] <= (team_data['bowlers'] + pool_data['allrounders']):
+        weight_dict['Bowler'] = 1
+    else:
+        r_bowler = (constraint_data['bowlers'] - (team_data['bowlers'] + pool_data['allrounders']))/(team_data['bowlers'] + pool_data['allrounders']  -  (constraint_data['bowlers'] - (team_data['bowlers'] + pool_data['allrounders'])))
+        weight_dict['Bowler'] = np.exp(r_bowler)
+
+    # for wicketkeepers
+    if constraint_data['wicketkeeper'] <= team_data['wicketkeeper']:
+        weight_dict['Wicket-Keeper'] = 1
+    else:
+        r_wicketkeeper = (constraint_data['wicketkeeper'] - team_data['wicketkeeper'])/(pool_data['wicketkeeper'] -  (constraint_data['wicketkeeper'] - team_data['wicketkeeper']))
+        weight_dict['Wicket-Keeper'] = np.exp(r_wicketkeeper)
+
+    weight_dict['All-Rounder'] = np.max(np.exp(r_batters),np.exp(r_bowler))
+
+    return  (player_data['Performance'] * weight_dict[player_data['Type']]).tolist()
+
+    
+
+
+
+    
 
 def bid_margin(price : int) -> int:
     """
@@ -135,7 +177,6 @@ def main():
         'budget' : 0
     }
 
-    player_weights = [0 for k in range(len(player_data))]
     player_evaluations = player_data['Performance'].to_list()
 
     # Create the auction
