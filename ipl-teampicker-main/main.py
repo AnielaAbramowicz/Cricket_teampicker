@@ -149,8 +149,8 @@ def bid_margin(price : int) -> int:
 
 def main():
     # load the dataset
-    player_data = pd.DataFrame("2024_auction_pool_mock.csv") #here choose the actual path
-    player_data.set_index('player', inplace=True) # set the player names as the index
+    player_data = pd.read_csv("C:/Users/radek/Downloads/ipl-teampicker-main/ipl-teampicker-main/2024_auction_pool_mock.csv") #here choose the actual path
+    player_data.set_index('PLAYER', inplace=True) # set the player names as the index
 
     # We should access the player data through the auction object that we create later,
     # so that we are using the up to date player data.
@@ -191,12 +191,12 @@ def main():
         # This is where the auction simulation stuff kinda comes into play.
         # For now we can just generate a random bid from a distribution that somewhat approximates a real bid for this type of player.
 
-        highest_opponent_bid = auction.player_data.loc[auction.current_player] # since this is a mock csv with prices generated form a log normal distribution, i'm just using that as the highest bid for now
+        highest_opponent_bid = auction.player_data.at[auction.current_player, 'Price'] # since this is a mock csv with prices generated form a log normal distribution, i'm just using that as the highest bid for now
 
         auction.new_bid(highest_opponent_bid) 
 
         # Now we have to answer: do we bid on this player?
-        lp_data = auction.player_data.drop('Performance')
+        lp_data = auction.player_data
         lp_data['Evaluation'] = player_evaluations
         # WE CALL THE LP HERE WITH THE DATA ABOVE AND THE CURRENT CONSTRAINTS
         # the price of the player should be the highest_opponent_bid + margin (there are specific, ipl specified, minimum margins depending on the bid price)
@@ -211,9 +211,9 @@ def main():
         auction.new_purchase(team) # this purchases the current player
 
         # Now we have to update the constraints, team data and player value weights
-        constraint_data = update_constraints(constraint_data, auction.event_log[-1])
-        team_data = update_team_data(team_data, auction.event_log[-1])
-        player_evaluations = calc_evaluations(player_data, player_weights, team_data, auction.event_log[-1])
+        constraint_data = update_constraints(constraint_data, auction.event_log[-1], player_data)
+        team_data = update_team_data(team_data, auction.event_log[-1], player_data)
+        player_evaluations = calc_evaluations(player_data, player_weights, team_data)
 
         # check if the auction is over
         if constraint_data['min_players'] == 0 or constraint_data['budget'] == 0 or len(auction.player_data) == 0:

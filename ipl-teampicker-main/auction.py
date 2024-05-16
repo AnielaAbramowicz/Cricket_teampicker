@@ -55,7 +55,7 @@ class Auction:
         """
 
         self.event_log.append(AuctionEvent(self.current_player, False))
-        self.player_data = self.player_data.at[player, 'price'] = price
+        self.player_data.at[self.current_player, 'Price'] = price
 
     def new_purchase(self, team : int):
         """
