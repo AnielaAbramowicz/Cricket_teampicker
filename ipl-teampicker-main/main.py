@@ -134,9 +134,9 @@ def calc_evaluations(player_data : pd.DataFrame, pool_data : dict, constraint_da
         r_wicketkeeper = (constraint_data['min_wicketkeepers'])/(pool_data['wicketkeepers'] -  constraint_data['min_wicketkeepers'])
         weight_dict['Wicket-Keeper'] = np.exp(r_wicketkeeper)
 
-    weight_dict['All-Rounder'] = np.max(weight_dict['Batter'],weight_dict['Bowler'])
+    weight_dict['All-Rounder'] = max(weight_dict['Batter'],weight_dict['Bowler'])
 
-    return (player_data['Performance'] * weight_dict[player_data['Type']]).tolist()
+    return player_data.apply(lambda row: row['Performance'] * weight_dict[row['TYPE']], axis=1).tolist()
 
     
     
