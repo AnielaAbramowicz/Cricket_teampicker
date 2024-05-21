@@ -1,11 +1,17 @@
 import pandas as pd
 import numpy as np
-from auction import Auction, AuctionEvent
 import os
+
+from auction import Auction, AuctionEvent
+from project_mock_lp import optimize_team
 from os import path
+from colorama import init as colorama_init, Fore, Style
+
 
 # Get the current working directory
 dir_path = os.path.dirname(os.path.realpath(__file__))
+
+TOTAL_PLAYERS = 332
 
 def update_constraints(constraint_data: dict, event : AuctionEvent, player_data : pd.DataFrame) -> dict:
     """
@@ -30,22 +36,22 @@ def update_constraints(constraint_data: dict, event : AuctionEvent, player_data 
 
     # Deal with the player role:
 
-    if player_data.loc[event.player]['Role'] == 'Batter':
+    if player_data.loc[event.player]['TYPE'] == 'Batter':
         new_constraints['min_batters'] -= 1
     
-    elif player_data.loc[event.player]['Role'] == 'Bowler':
+    elif player_data.loc[event.player]['TYPE'] == 'Bowler':
         new_constraints['min_bowlers'] -= 1
 
-    elif player_data.loc[event.player]['Role'] == 'Wicketkeeper':
+    elif player_data.loc[event.player]['TYPE'] == 'Wicket-Keeper':
         new_constraints['min_wicketkeepers'] -= 1
         new_constraints['min_batters'] -= 1 # wicketkeepers are also batters
 
-    elif player_data.loc[event.player]['Role'] == 'Allrounder':
+    elif player_data.loc[event.player]['TYPE'] == 'All-Rounder':
         new_constraints['min_allrounders'] -= 1
         new_constraints['min_batters'] -= 1 # allrounders are also batters
         new_constraints['min_bowlers'] -= 1 # allrounders are also bowlers
 
-    if player_data.loc[event.player]['OverseasIndian'] != 'India':
+    if player_data.loc[event.player]['OverseasIndian'] != 'Indian':
         new_constraints['max_foreign'] -= 1
 
     new_constraints['budget'] -= event.price_sold # adjust the budget
@@ -71,19 +77,21 @@ def update_team_data(team_data : dict, event : AuctionEvent, player_data : pd.Da
     new_team_data['total'] += 1
 
     # Deal with the player role:
-    if player_data.loc[event.player]['Role'] == 'Batter':
+    if player_data.loc[event.player]['TYPE'] == 'Batter':
         new_team_data['batters'] += 1
     
-    elif player_data.loc[event.player]['Role'] == 'Bowler':
+    elif player_data.loc[event.player]['TYPE'] == 'Bowler':
         new_team_data['bowlers'] += 1
 
-    elif player_data.loc[event.player]['Role'] == 'Wicketkeeper':
+    elif player_data.loc[event.player]['TYPE'] == 'Wicket-Keeper':
         new_team_data['wicketkeepers'] += 1
 
-    elif player_data.loc[event.player]['Role'] == 'Allrounder':
+    elif player_data.loc[event.player]['TYPE'] == 'All-Rounder':
         new_team_data['allrounders'] += 1
 
-    if player_data.loc[event.player]['OverseasIndian'] != 'India':
+    if player_data.loc[event.player]['OverseasIndian'] == 'Indian':
+        new_team_data['indian'] += 1
+    else:
         new_team_data['foreign'] += 1
 
     return new_team_data 
@@ -115,30 +123,40 @@ def calc_evaluations(player_data : pd.DataFrame, pool_data : dict, constraint_da
         'All-Rounder' : 1
     }
 
+    players_left = pool_data['total']
+
+    # We can tweak this hyperparameter
+    alpha = 1
+
     # for batters
     if constraint_data['min_batters'] > 0:
         #checks if we neeed more batters
         r_batters = (constraint_data['min_batters'])/(pool_data['batters'] + pool_data['wicketkeepers'] + pool_data['allrounders'] - constraint_data['min_batters'])
         # pool_data['batters'] + pool_data['wicketkeepers'] + pool_data['allrounders'] = how many batters are left
-        weight_dict['Batter'] = np.exp(r_batters)
+        weight_dict['Batter'] = np.exp(alpha * r_batters)
 
     # for bowlers
     if constraint_data['min_bowlers'] > 0:
         #checks if we neeed more bowlers
-        r_bowler = (constraint_data['min_bowlers'])/(team_data['bowlers'] + pool_data['allrounders']  - constraint_data['min_bowlers'])
-        weight_dict['Bowler'] = np.exp(r_bowler)
+        r_bowler = (constraint_data['min_bowlers'])/(pool_data['bowlers'] + pool_data['allrounders']  - constraint_data['min_bowlers'])
+        weight_dict['Bowler'] = np.exp(alpha * r_bowler)
 
     # for wicketkeepers
     if constraint_data['min_wicketkeepers'] > 0:
         #checks if we neeed more wicketkeepers
         r_wicketkeeper = (constraint_data['min_wicketkeepers'])/(pool_data['wicketkeepers'] -  constraint_data['min_wicketkeepers'])
-        weight_dict['Wicket-Keeper'] = np.exp(r_wicketkeeper)
+        weight_dict['Wicket-Keeper'] = np.exp(alpha * r_wicketkeeper)
 
     weight_dict['All-Rounder'] = max(weight_dict['Batter'],weight_dict['Bowler'])
 
     return player_data.apply(lambda row: row['Performance'] * weight_dict[row['TYPE']], axis=1).tolist()
 
-    
+def inflate_current_player_eval(evaluation, players_left):
+    # I thought that maybe it would be beneficial to inflate the evaluation of the player currently being bid on
+    # to encourage the algorithm to buy players earlier on, in order to avoid the risk that comes with waiting until
+    # the end of the auction to buy players
+    a = 1
+    return evaluation * (1 + (players_left / TOTAL_PLAYERS)) * a
     
 
 def bid_margin(price : int) -> int:
@@ -167,12 +185,19 @@ def bid_margin(price : int) -> int:
         return 2500000 # 25 Lakh
 
 def main():
-    # load the dataset
-    player_data = pd.read_csv(path.join(dir_path, "2024_auction_pool_mock.csv")) #here choose the actual path
-    player_data.set_index('PLAYER', inplace=True) # set the player names as the index
+    colorama_init() # initialize colorama
 
+    # load the dataset
+    # NB:
     # We should access the player data through the auction object that we create later,
     # so that we are using the up to date player data.
+    pd_og = pd.read_csv(path.join(dir_path, "2024_auction_pool_mock.csv")) #here choose the actual path
+
+    # There are two people named Shashank Singh, so we need to change one of their names
+    i = pd_og[pd_og['PLAYER'] == 'Shashank Singh'].index[0]
+    pd_og.at[i, 'PLAYER'] = 'Shashank Singh (2)'
+
+    pd_og.set_index('PLAYER', inplace=True) # set the player names as the index
 
     # an array storing the current info on our team, below what each index means
     team_data = {
@@ -187,68 +212,89 @@ def main():
 
     # list of all the constraints, in order of index
     constraint_data = {
-        'min_batters' : 0,
-        'min_bowlers' : 0,
-        'min_wicketkeepers' : 0,
-        'min_allrounders' : 0,
-        'max_foreign' : 0,
-        'min_players' : 0,
-        'budget' : 0
+        'min_batters' : 8,
+        'min_bowlers' : 8,
+        'min_wicketkeepers' : 3,
+        'min_allrounders' : 5,
+        'max_foreign' : 4,
+        'min_players' : 25,
+        'budget' : 100 * 1000000 # 100 Crore
     }
 
     selected_team = []
 
-    player_evaluations = player_data['Performance'].to_list()
+    print(f"{Fore.GREEN}Starting Auction.")
+    print(f"Budget: {Style.RESET_ALL}{constraint_data['budget']}")
+    print()
 
     # Create the auction
-    auction = Auction(player_data)
+    auction = Auction(pd_og)
 
     # Auction loop
     auction_over = False
     while not auction_over:
-        print(f"Currently bidding on {auction.current_player}: ")
+        print(f"Currently bidding on {Fore.RED}{auction.current_player}{Style.RESET_ALL}\t\t\t", end='\r')
 
         # Here we do some stuff to handle what happens in the auction.
         # This is where the auction simulation stuff kinda comes into play.
         # For now we can just generate a random bid from a distribution that somewhat approximates a real bid for this type of player.
 
+        # Calculate player evaluations
+        player_evaluations = calc_evaluations(auction.player_data, auction.pool_data, constraint_data, team_data)
+
         highest_opponent_bid = auction.player_data.at[auction.current_player, 'Price'] # since this is a mock csv with prices generated form a log normal distribution, i'm just using that as the highest bid for now
 
-        auction.new_bid(highest_opponent_bid) 
+        auction.new_bid(highest_opponent_bid, team=0) 
 
         # Now we have to answer: do we bid on this player?
         lp_data = auction.player_data
         lp_data['Evaluation'] = player_evaluations
+        # Filter out unavailable players
+        lp_data = lp_data[lp_data['Available']]
+        # Add the bid margin to each player's price
+        lp_data.loc[:, 'Price'] = lp_data['Price'].apply(lambda x: x + bid_margin(x))
+        # Inflate the current player's evaluation
+        #lp_data.loc[auction.current_player, 'Evaluation'] = inflate_current_player_eval(lp_data.loc[auction.current_player, 'Evaluation'], auction.pool_data['total'])
         # WE CALL THE LP HERE WITH THE DATA ABOVE AND THE CURRENT CONSTRAINTS
         # the price of the player should be the highest_opponent_bid + margin (there are specific, ipl specified, minimum margins depending on the bid price)
         # THE LP RETURNS A TEAM
-        team = []
-        if auction.current_player in team: # If the player is in the LP's optimal team, we bid
-            auction.new_bid(highest_opponent_bid + bid_margin(highest_opponent_bid))
+        dream_team = optimize_team(lp_data, constraint_data)
+        if auction.current_player in dream_team: # If the player is in the LP's optimal team, we bid
+            auction.new_bid(highest_opponent_bid + bid_margin(highest_opponent_bid), team=1)
 
-        # WAS OUR BID SUCCESFUl?
-        # since we are not simulating auction dynamics yet, we say that it was
-        team = 1 # 1 is us
-        purchaed_player = auction.new_purchase(team) # this purchases the current player
+            # WAS OUR BID SUCCESFUl?
+            # since we are not simulating auction dynamics yet, we say that it was
+            team = 1 # 1 is us
+            purchased_player = auction.new_purchase(1) # this purchases the current player
 
-        if team == 1:
+            print(end='\x1b[2K') # Clear the line
+            print(f"Purchased player: {Fore.GREEN}{purchased_player}{Style.RESET_ALL}")
+
             # Add the player to our team
-            selected_team.append(purchaed_player)
-
+            selected_team.append(purchased_player)
+        else:
+            # In this case, the opponent "won" the bid (we don't need this player)
+            auction.new_purchase(0)
 
         # Now we have to update the constraints, team data and player value weights
-        constraint_data = update_constraints(constraint_data, auction.event_log[-1], player_data)
-        team_data = update_team_data(team_data, auction.event_log[-1], player_data)
-        player_evaluations = calc_evaluations(player_data, auction.pool_data, constraint_data, team_data)
+        constraint_data = update_constraints(constraint_data, auction.event_log[-1], auction.player_data)
+        team_data = update_team_data(team_data, auction.event_log[-1], auction.player_data)
 
         # check if the auction is over
-        if constraint_data['min_players'] == 0 or constraint_data['budget'] == 0 or len(auction.player_data) == 0:
+        if constraint_data['min_players'] == 0 or constraint_data['budget'] == 0 or auction.player_data['Available'].value_counts()[True] == 0:
             auction_over = True
             
-    print("Auction Over.")
-    print("Selected Team:")
-    for i, p in enumerate(selected_team):
-        print(f"{i}: {p}")
+    print()
+    print(f"{Fore.BLUE}Auction Over.")
+    print(f"Team statistics: {Style.RESET_ALL}")
+    print()
+    print(f"Batters: {team_data['batters']}")
+    print(f"Bowlers: {team_data['bowlers']}")
+    print(f"Allrounders: {team_data['allrounders']}")
+    print(f"Wicketkeepers: {team_data['wicketkeepers']}")
+    print(f"Foreign Players: {team_data['foreign']}")
+    print(f"Total Players: {team_data['total']}")
+    print(f"Budget Remaining: {constraint_data['budget']}")
 
 if __name__ == '__main__':
     main()

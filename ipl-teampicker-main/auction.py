@@ -17,6 +17,9 @@ class Auction:
     def __init__(self, player_data : pd.DataFrame):
         self.player_data = player_data.copy()
 
+        # Add an "available" column
+        self.player_data['Available'] = True
+
         self.pool_data = {
             'batters' : self.player_data['TYPE'].value_counts()['Batter'],
             'bowlers' : self.player_data['TYPE'].value_counts()['Bowler'],
@@ -24,6 +27,7 @@ class Auction:
             'allrounders' : self.player_data['TYPE'].value_counts()['All-Rounder'],
             'foreign' : self.player_data['OverseasIndian'].value_counts()['Overseas'],
             'indian' : self.player_data['OverseasIndian'].value_counts()['Indian'],
+            'total' : len(self.player_data)
         }
 
         self.role_mapping = {
@@ -48,7 +52,7 @@ class Auction:
 
         return self.current_player
 
-    def new_bid(self, price: int):
+    def new_bid(self, price: int, team : int):
         """
         Reflects a bid being placed on the current player being bid on.
         Sets the price of the player to the new bid price.
@@ -61,7 +65,7 @@ class Auction:
             None
         """
 
-        self.event_log.append(AuctionEvent(self.current_player, False))
+        self.event_log.append(AuctionEvent(self.current_player, True, team))
         self.player_data.at[self.current_player, 'Price'] = price
 
     def new_purchase(self, team : int):
@@ -78,11 +82,12 @@ class Auction:
             str: The name of the player that was purchased.
         """
 
-        self.event_log.append(AuctionEvent(self.current_player, team, True))
+        self.event_log.append(AuctionEvent(self.current_player, False, team=team, price_sold=self.player_data.at[self.current_player, 'Price']))
 
         # Update the role counts
-        role = self.player_data.loc[self.current_player]['TYPE']
+        role = self.player_data.at[self.current_player, 'TYPE']
         self.pool_data[self.role_mapping[role]] -= 1
+        self.pool_data['total'] -= 1
 
         # Update the foreign/indian counts
         origin = self.player_data.loc[self.current_player]['OverseasIndian']
@@ -91,12 +96,12 @@ class Auction:
         else:
             self.pool_data['indian'] -= 1
 
+        # Set the player as unavailable
+        self.player_data.at[self.current_player, 'Available'] = False
+
         # Pick a new player
         purchased_player = self.current_player
-        self.current_player = self.player_data.index[self.rng.integers(0, len(self.player_data))]
-
-        # Remove the player from the pool
-        self.player_data = self.player_data.drop(self.current_player, axis = 0)
+        self.current_player = self.player_data[self.player_data['Available']].index[self.rng.integers(0, self.pool_data['total'])]
 
         # Here we should set the price of the player to asking price (we don't have that data in the csv yet)
 

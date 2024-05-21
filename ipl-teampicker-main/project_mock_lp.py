@@ -1,9 +1,21 @@
 import pandas as pd
 from pulp import LpMaximize, LpProblem, LpVariable, lpSum, value
+from pulp.apis import PULP_CBC_CMD
 
-def optimize_team(data, price_cap, number_players, min_batsmen, min_bowlers, max_foreign_players, player_evaluations):
+def optimize_team(data : pd.DataFrame, constraints : dict):
+    # Unpack the constraints:
+    number_players = constraints['min_players']
+    min_batsmen = constraints['min_batters']
+    min_bowlers = constraints['min_bowlers']
+    max_foreign_players = constraints['max_foreign']
+    min_allrounders = constraints['min_allrounders']
+    min_wicketkeepers = constraints['min_wicketkeepers']
+    price_cap = constraints['budget']
+
+    player_evaluations = data['Evaluation'].tolist()
+
     # Create model
-    model = LpProblem(name="Fantasy_Team_Optimization", sense=LpMaximize)
+    model : LpProblem = LpProblem(name="Fantasy_Team_Optimization", sense=LpMaximize)
     
     # Create binary variables
     n = len(data)
@@ -20,28 +32,53 @@ def optimize_team(data, price_cap, number_players, min_batsmen, min_bowlers, max
     model += lpSum(players) == number_players
     
     # Total price constraint
-    total_price_constraint = lpSum(players * data['Price']) <= price_cap
+    total_price_constraint = lpSum([players[i] * data['Price'].iloc[i] for i in range(n)]) <= price_cap
     model += total_price_constraint
     
-    # Position constraints (at least two batsmen, at least two bowlers)
-    batsmen_vars = [players[i] for i in range(n) if data['TYPE'][i] == 'Batsman']
-    bowlers_vars = [players[i] for i in range(n) if data['TYPE'][i] == 'Bowler']
+    # Position constraints
+    batsmen_vars = [players[i] for i in range(n) if data['TYPE'].iloc[i] == 'Batter']
+    bowlers_vars = [players[i] for i in range(n) if data['TYPE'].iloc[i] == 'Bowler']
+    allrounders_vars = [players[i] for i in range(n) if data['TYPE'].iloc[i] == 'All-Rounder']
+    wicketkeepers_vars = [players[i] for i in range(n) if data['TYPE'].iloc[i] == 'Wicket-Keeper']
     
     model += lpSum(batsmen_vars) >= min_batsmen
     model += lpSum(bowlers_vars) >= min_bowlers
+    model += lpSum(allrounders_vars) >= min_allrounders
+    model += lpSum(wicketkeepers_vars) >= min_wicketkeepers
     
     # Nationality constraints (at most max_foreign_players non-Indian players)
-    foreign_vars = [players[i] for i in range(n) if data['OverseasIndian'][i] != 'Indian']
+    foreign_vars = [players[i] for i in range(n) if data['OverseasIndian'].iloc[i] != 'Indian']
     model += lpSum(foreign_vars) <= max_foreign_players
     
     # Objective function
-    total_performance = lpSum(players[i] * player_evaluations[i] for i in range(len(player_evaluations)))
+    total_performance = lpSum(players[i] * player_evaluations[i] for i in range(n))
     model += total_performance
     
     # Optimize the model
-    model.solve()
+    model.solve(PULP_CBC_CMD(msg=0)) # PUlP_CBC_CMD is the default solver, msg=0 suppresses the text output
     
     # Get the selected team
-    selected_team = [data['PLAYER'][i] for i in range(len(players)) if value(players[i]) == 1]
+    selected_team = [data.index[i] for i in range(len(players)) if value(players[i]) == 1]
+
+    # Get the team data
+    #team_data = {
+    #    'batters' : len([player for player in selected_team if data['TYPE'].loc[player] == 'Batter']),
+    #    'bowlers' : len([player for player in selected_team if data['TYPE'].loc[player] == 'Bowler']),
+    #    'allrounders' : len([player for player in selected_team if data['TYPE'].loc[player] == 'All-Rounder']),
+    #    'wicketkeepers' : len([player for player in selected_team if data['TYPE'].loc[player] == 'Wicket-Keeper']),
+    #    'foreign' : len([player for player in selected_team if data['OverseasIndian'].loc[player] != 'Indian']),
+    #    'total' : len(selected_team),
+    #    'spent' : sum(data['Price'].loc[player] for player in selected_team)
+    #}
+   #
+    #print(f"Team statistics:")
+    #print()
+    #print(f"Batters: {team_data['batters']}")
+    #print(f"Bowlers: {team_data['bowlers']}")
+    #print(f"Allrounders: {team_data['allrounders']}")
+    #print(f"Wicketkeepers: {team_data['wicketkeepers']}")
+    #print(f"Foreign Players: {team_data['foreign']}")
+    #print(f"Total Players: {team_data['total']}")
+    #print(f"Budget Remaining: {price_cap - team_data['spent']}")
     
     return selected_team
