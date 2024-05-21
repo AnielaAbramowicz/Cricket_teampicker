@@ -133,9 +133,6 @@ def calc_evaluations(player_data : pd.DataFrame, pool_data : dict, constraint_da
     return  (player_data['Performance'] * weight_dict[player_data['Type']]).tolist()
 
     
-
-
-
     
 
 def bid_margin(price : int) -> int:
@@ -145,7 +142,23 @@ def bid_margin(price : int) -> int:
     The margin is dependent on the bid price.
     """
 
-    return price + 0.1*price # IDK what the actual margin is rn so i made this up
+    # For bids up to Rs. 1 Crore, the increment is Rs. 5 Lakh
+    # For bids from Rs. 1 Crore to Rs. 2 Crore, the increments is Rs. 10 Lakh
+    # For bids from Rs. 2 Crore to Rs. 3 Crore, the increment is Rs. 20 Lakh
+    # The increments for each Crore above 3 is up to the auctioner's dicretion... 
+    # they "usually go up to Rs. 25 lakh after the 10-crore mark" and "cannot be below 20 Lakh"
+
+    # Rs. 1 Lakh = Rs. 100 000
+    # Rs. 1 Crore = Rs. 100 Lakh = Rs. 10 000 000
+
+    if price < 10000000: # If price < 1 Crore
+        return 500000 # 5 Lakh
+    elif price < 20000000: # If price < 2 Crore
+        return 1000000 # 10 Lakh
+    elif price < 30000000: # If price < 3 Crore
+        return 2000000 # 20 Lakh
+    else: # If price is above 3 Crore
+        return 2500000 # 25 Lakh
 
 def main():
     # load the dataset
