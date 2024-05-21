@@ -1,7 +1,7 @@
 import pandas as pd
 from pulp import LpMaximize, LpProblem, LpVariable, lpSum, value
 
-def optimize_team(data, price_cap, number_players, min_batsmen, min_bowlers, max_foreign_players, player_evaluations, team_optimized):
+def optimize_team(data, price_cap, number_players, min_batsmen, min_bowlers, max_foreign_players, player_evaluations):
     # Create model
     model = LpProblem(name="Fantasy_Team_Optimization", sense=LpMaximize)
     
