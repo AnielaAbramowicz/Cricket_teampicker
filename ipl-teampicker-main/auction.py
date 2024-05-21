@@ -12,7 +12,7 @@ class AuctionEvent:
 class Auction:
 
     event_log = []
-    current_player = None
+    current_player : str = None
 
     def __init__(self, player_data : pd.DataFrame):
         self.player_data = player_data.copy()
@@ -22,8 +22,15 @@ class Auction:
             'bowlers' : self.player_data['TYPE'].value_counts()['Bowler'],
             'wicketkeepers' : self.player_data['TYPE'].value_counts()['Wicket-Keeper'],
             'allrounders' : self.player_data['TYPE'].value_counts()['All-Rounder'],
-            'foreign' : self.player_data['OverseasIndian'].value_counts()['Foreign'],
+            'foreign' : self.player_data['OverseasIndian'].value_counts()['Overseas'],
             'indian' : self.player_data['OverseasIndian'].value_counts()['Indian'],
+        }
+
+        self.role_mapping = {
+            'Batter' : 'batters',
+            'Bowler' : 'bowlers',
+            'Wicket-Keeper' : 'wicketkeepers',
+            'All-Rounder' : 'allrounders'
         }
 
         self.rng = np.random.default_rng(seed=420)
@@ -68,17 +75,14 @@ class Auction:
             team (int): 1 if is is our team, 0 otherwise.
 
         Returns:
-            None
+            str: The name of the player that was purchased.
         """
 
         self.event_log.append(AuctionEvent(self.current_player, team, True))
 
-        # Update the player data
-        self.player_data = self.player_data.drop(self.current_player, axis = 0) # Remove the player from the pool
-
         # Update the role counts
         role = self.player_data.loc[self.current_player]['TYPE']
-        self.pool_data[role] -= 1
+        self.pool_data[self.role_mapping[role]] -= 1
 
         # Update the foreign/indian counts
         origin = self.player_data.loc[self.current_player]['OverseasIndian']
@@ -88,6 +92,12 @@ class Auction:
             self.pool_data['indian'] -= 1
 
         # Pick a new player
+        purchased_player = self.current_player
         self.current_player = self.player_data.index[self.rng.integers(0, len(self.player_data))]
 
+        # Remove the player from the pool
+        self.player_data = self.player_data.drop(self.current_player, axis = 0)
+
         # Here we should set the price of the player to asking price (we don't have that data in the csv yet)
+
+        return purchased_player
