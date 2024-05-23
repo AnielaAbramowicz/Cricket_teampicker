@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from functools import partial
 
 def resample_acution(auction : pd.DataFrame, reshuffle : bool) -> pd.DataFrame:
     """
@@ -19,19 +20,21 @@ def resample_acution(auction : pd.DataFrame, reshuffle : bool) -> pd.DataFrame:
     indian_uncapped_price = auction[(auction['IndianOverseas'] == 'Indian') & (auction['Played For Country'] == 0)]['Selling Price'].tolist()
     international_price = auction[auction['IndianOverseas'] == 'Overseas']['Selling Price'].tolist()
 
+    def new_price(row, indian_capped_price, indian_uncapped_price, international_price):
+        if row['IndianOverseas'] == 'Overseas':
+            return np.random.choice(international_price)
+        elif row['Played For Country'] == 0:
+            return np.random.choice(indian_uncapped_price)
+        else:
+            return np.random.choice(indian_capped_price)
+
+    new_price_func = partial(new_price, indian_capped_price = indian_capped_price, indian_uncapped_price = indian_uncapped_price, international_price = international_price)
 
     new_auction = auction.copy()
 
-    new_auction['Selling Price'] = new_auction.apply(lambda row:new_price(row['IndianOverseas'], row['Played For Country']), axis=1)
+    new_auction['Selling Price'] = new_auction.apply(new_price_func, axis=1)
+
+    if reshuffle:
+        new_auction = new_auction.sample(frac=1).reset_index(drop=True)
 
     return new_auction
-
-def new_price(nationality : str , capped : int) -> float:
-    global indian_capped_price, indian_uncapped_price, international_price
-
-    if nationality == 'Overseas':
-        return np.random.choice(international_price)
-    elif capped == 0:
-        return np.random.choice(indian_uncapped_price)
-    else:
-        return np.random.choice(indian_capped_price)
