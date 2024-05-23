@@ -11,7 +11,6 @@ def optimize_team(data : pd.DataFrame, constraints : dict):
     min_allrounders = constraints['min_allrounders']
     min_wicketkeepers = constraints['min_wicketkeepers']
     price_cap = constraints['budget']
-
     player_evaluations = data['Evaluation'].tolist()
 
     # Create model
@@ -60,25 +59,4 @@ def optimize_team(data : pd.DataFrame, constraints : dict):
     # Get the selected team
     selected_team = [data.index[i] for i in range(len(players)) if value(players[i]) == 1]
 
-    # Get the team data
-    #team_data = {
-    #    'batters' : len([player for player in selected_team if data['TYPE'].loc[player] == 'Batter']),
-    #    'bowlers' : len([player for player in selected_team if data['TYPE'].loc[player] == 'Bowler']),
-    #    'allrounders' : len([player for player in selected_team if data['TYPE'].loc[player] == 'All-Rounder']),
-    #    'wicketkeepers' : len([player for player in selected_team if data['TYPE'].loc[player] == 'Wicket-Keeper']),
-    #    'foreign' : len([player for player in selected_team if data['OverseasIndian'].loc[player] != 'Indian']),
-    #    'total' : len(selected_team),
-    #    'spent' : sum(data['Price'].loc[player] for player in selected_team)
-    #}
-   #
-    #print(f"Team statistics:")
-    #print()
-    #print(f"Batters: {team_data['batters']}")
-    #print(f"Bowlers: {team_data['bowlers']}")
-    #print(f"Allrounders: {team_data['allrounders']}")
-    #print(f"Wicketkeepers: {team_data['wicketkeepers']}")
-    #print(f"Foreign Players: {team_data['foreign']}")
-    #print(f"Total Players: {team_data['total']}")
-    #print(f"Budget Remaining: {price_cap - team_data['spent']}")
-    
     return selected_team
