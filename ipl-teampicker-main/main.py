@@ -128,7 +128,7 @@ def calc_evaluations(player_data : pd.DataFrame, pool_data : dict, constraint_da
     players_left = pool_data['total']
 
     # We can tweak this hyperparameter
-    alpha = 1
+    alpha = 1 
 
     # for batters
     if constraint_data['min_batters'] > 0:
@@ -157,8 +157,8 @@ def inflate_current_player_eval(evaluation, players_left):
     # I thought that maybe it would be beneficial to inflate the evaluation of the player currently being bid on
     # to encourage the algorithm to buy players earlier on, in order to avoid the risk that comes with waiting until
     # the end of the auction to buy players
-    a = 0.8
-    return evaluation * (1 + (players_left / TOTAL_PLAYERS)) * a
+    a = 0
+    return evaluation * (1 + a*(players_left / TOTAL_PLAYERS))
     
 
 def bid_margin(price : int) -> int:
@@ -202,10 +202,6 @@ def load_data(pth : str) -> pd.DataFrame:
     # so that we are using the up to date player data.
     pd_og = pd.read_csv(path.join(dir_path, pth)) #here choose the actual path
 
-    # There are two people named Shashank Singh, so we need to change one of their names
-    i = pd_og[pd_og['PLAYER'] == 'Shashank Singh'].index[0]
-    pd_og.at[i, 'PLAYER'] = 'Shashank Singh (2)'
-
     pd_og.set_index('PLAYER', inplace=True) # set the player names as the index
 
     return pd_og
@@ -214,11 +210,7 @@ def load_data(pth : str) -> pd.DataFrame:
 def main():
     colorama_init() # initialize colorama
 
-    pd_og = load_data(path.join(dir_path, "2024_auction_pool_with_prices.csv"))
-
-    # Generate new prices
-    pd_og['Selling Price'] = generate_prices(pd_og)
-    print(pd_og['Selling Price'].head())
+    pd_og = load_data(path.join(dir_path, "2024_auction_pool.csv"))
 
     # an array storing the current info on our team, below what each index means
     team_data = {
@@ -265,6 +257,11 @@ def main():
         player_evaluations = calc_evaluations(auction.player_data, auction.pool_data, constraint_data, team_data)
 
         highest_opponent_bid = auction.player_data.at[auction.current_player, 'Selling Price'] # since this is a mock csv with prices generated form a log normal distribution, i'm just using that as the highest bid for now
+
+        if highest_opponent_bid == 0: # Nobody wants this guy
+            # We treat the highest opponent bid as the base price of the player,
+            # minus the bid margin to compensate for when we add the bid margin later
+            highest_opponent_bid = auction.player_data.at[auction.current_player, 'Base Price'] - bid_margin(auction.player_data.at[auction.current_player, 'Base Price'])
 
         auction.new_bid(highest_opponent_bid, team=0) 
 

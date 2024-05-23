@@ -37,7 +37,7 @@ class Auction:
             'All-Rounder' : 'allrounders'
         }
 
-        self.rng = np.random.default_rng(seed=420)
+        self.rng = np.random.default_rng(seed=1)
 
         # Set the current player
         self.current_player = self.player_data.index[self.rng.integers(0, len(self.player_data))]
