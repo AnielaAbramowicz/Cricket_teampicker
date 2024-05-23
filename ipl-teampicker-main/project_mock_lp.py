@@ -13,7 +13,7 @@ def optimize_team(data : pd.DataFrame, constraints : dict):
     min_wicketkeepers = constraints['min_wicketkeepers']
     price_cap = constraints['budget']
     player_evaluations = data['Evaluation'].tolist()
-
+    
     # Create model
     model : LpProblem = LpProblem(name="Fantasy_Team_Optimization", sense=LpMaximize)
     
