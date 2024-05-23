@@ -6,6 +6,7 @@ from auction import Auction, AuctionEvent
 from project_mock_lp import optimize_team
 from os import path
 from colorama import init as colorama_init, Fore, Style
+from pp_gen import generate_prices
 
 
 # Get the current working directory
@@ -33,6 +34,7 @@ def update_constraints(constraint_data: dict, event : AuctionEvent, player_data 
         return new_constraints
 
     new_constraints['min_players'] -= 1 # we have added a player to our team
+    new_constraints['max_players'] -= 1 
 
     # Deal with the player role:
 
@@ -155,7 +157,7 @@ def inflate_current_player_eval(evaluation, players_left):
     # I thought that maybe it would be beneficial to inflate the evaluation of the player currently being bid on
     # to encourage the algorithm to buy players earlier on, in order to avoid the risk that comes with waiting until
     # the end of the auction to buy players
-    a = 1
+    a = 0.8
     return evaluation * (1 + (players_left / TOTAL_PLAYERS)) * a
     
 
@@ -184,20 +186,39 @@ def bid_margin(price : int) -> int:
     else: # If price is above 3 Crore
         return 2500000 # 25 Lakh
 
-def main():
-    colorama_init() # initialize colorama
+def load_data(pth : str) -> pd.DataFrame:
+    """
+    Load the data from the given path.
 
+    Parameters:
+    pth (str): The path to the data.
+
+    Returns:
+    pd.DataFrame: The data frame containing the data.
+    """
     # load the dataset
     # NB:
     # We should access the player data through the auction object that we create later,
     # so that we are using the up to date player data.
-    pd_og = pd.read_csv(path.join(dir_path, "2024_auction_pool_mock.csv")) #here choose the actual path
+    pd_og = pd.read_csv(path.join(dir_path, pth)) #here choose the actual path
 
     # There are two people named Shashank Singh, so we need to change one of their names
     i = pd_og[pd_og['PLAYER'] == 'Shashank Singh'].index[0]
     pd_og.at[i, 'PLAYER'] = 'Shashank Singh (2)'
 
     pd_og.set_index('PLAYER', inplace=True) # set the player names as the index
+
+    return pd_og
+
+
+def main():
+    colorama_init() # initialize colorama
+
+    pd_og = load_data(path.join(dir_path, "2024_auction_pool_with_prices.csv"))
+
+    # Generate new prices
+    pd_og['Selling Price'] = generate_prices(pd_og)
+    print(pd_og['Selling Price'].head())
 
     # an array storing the current info on our team, below what each index means
     team_data = {
@@ -217,7 +238,8 @@ def main():
         'min_wicketkeepers' : 3,
         'min_allrounders' : 5,
         'max_foreign' : 4,
-        'min_players' : 25,
+        'min_players' : 18,
+        'max_players' : 25,
         'budget' : 100 * 1000000 # 100 Crore
     }
 
@@ -242,19 +264,22 @@ def main():
         # Calculate player evaluations
         player_evaluations = calc_evaluations(auction.player_data, auction.pool_data, constraint_data, team_data)
 
-        highest_opponent_bid = auction.player_data.at[auction.current_player, 'Price'] # since this is a mock csv with prices generated form a log normal distribution, i'm just using that as the highest bid for now
+        highest_opponent_bid = auction.player_data.at[auction.current_player, 'Selling Price'] # since this is a mock csv with prices generated form a log normal distribution, i'm just using that as the highest bid for now
 
         auction.new_bid(highest_opponent_bid, team=0) 
 
         # Now we have to answer: do we bid on this player?
-        lp_data = auction.player_data
+        lp_data = auction.player_data.drop(columns=['Selling Price'])
         lp_data['Evaluation'] = player_evaluations
+        lp_data.rename(columns={'Predicted Price' : 'Price'}, inplace=True)
         # Filter out unavailable players
         lp_data = lp_data[lp_data['Available']]
+        # Set the price of the current player to the highest opponent bid
+        lp_data.loc[auction.current_player, 'Price'] = highest_opponent_bid
         # Add the bid margin to each player's price
         lp_data.loc[:, 'Price'] = lp_data['Price'].apply(lambda x: x + bid_margin(x))
         # Inflate the current player's evaluation
-        #lp_data.loc[auction.current_player, 'Evaluation'] = inflate_current_player_eval(lp_data.loc[auction.current_player, 'Evaluation'], auction.pool_data['total'])
+        lp_data.loc[auction.current_player, 'Evaluation'] = inflate_current_player_eval(lp_data.loc[auction.current_player, 'Evaluation'], auction.pool_data['total'])
         # WE CALL THE LP HERE WITH THE DATA ABOVE AND THE CURRENT CONSTRAINTS
         # the price of the player should be the highest_opponent_bid + margin (there are specific, ipl specified, minimum margins depending on the bid price)
         # THE LP RETURNS A TEAM
@@ -281,9 +306,9 @@ def main():
         team_data = update_team_data(team_data, auction.event_log[-1], auction.player_data)
 
         # check if the auction is over
-        if constraint_data['min_players'] == 0 or constraint_data['budget'] == 0 or auction.player_data['Available'].value_counts()[True] == 0:
+        if constraint_data['max_players'] == 0 or constraint_data['budget'] == 0 or auction.player_data['Available'].value_counts()[False] == len(auction.player_data):
             auction_over = True
-            
+
     print()
     print(f"{Fore.BLUE}Auction Over.")
     print(f"Team statistics: {Style.RESET_ALL}")
@@ -295,6 +320,8 @@ def main():
     print(f"Foreign Players: {team_data['foreign']}")
     print(f"Total Players: {team_data['total']}")
     print(f"Budget Remaining: {constraint_data['budget']}")
+    print(f"Total Performance: {sum(pd_og.loc[selected_team]['Performance'])}")
+
 
 if __name__ == '__main__':
     main()

@@ -66,7 +66,7 @@ class Auction:
         """
 
         self.event_log.append(AuctionEvent(self.current_player, True, team))
-        self.player_data.at[self.current_player, 'Price'] = price
+        self.player_data.at[self.current_player, 'Selling Price'] = price
 
     def new_purchase(self, team : int):
         """
@@ -82,7 +82,7 @@ class Auction:
             str: The name of the player that was purchased.
         """
 
-        self.event_log.append(AuctionEvent(self.current_player, False, team=team, price_sold=self.player_data.at[self.current_player, 'Price']))
+        self.event_log.append(AuctionEvent(self.current_player, False, team=team, price_sold=self.player_data.at[self.current_player, 'Selling Price']))
 
         # Update the role counts
         role = self.player_data.at[self.current_player, 'TYPE']
@@ -101,7 +101,10 @@ class Auction:
 
         # Pick a new player
         purchased_player = self.current_player
-        self.current_player = self.player_data[self.player_data['Available']].index[self.rng.integers(0, self.pool_data['total'])]
+        if self.pool_data['total'] == 0:
+            self.current_player = None
+        else:
+            self.current_player = self.player_data[self.player_data['Available']].index[self.rng.integers(0, self.pool_data['total'])]
 
         # Here we should set the price of the player to asking price (we don't have that data in the csv yet)
 

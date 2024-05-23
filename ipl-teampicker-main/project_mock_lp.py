@@ -4,7 +4,8 @@ from pulp.apis import PULP_CBC_CMD
 
 def optimize_team(data : pd.DataFrame, constraints : dict):
     # Unpack the constraints:
-    number_players = constraints['min_players']
+    max_players = constraints['max_players']
+    min_players = constraints['min_players']
     min_batsmen = constraints['min_batters']
     min_bowlers = constraints['min_bowlers']
     max_foreign_players = constraints['max_foreign']
@@ -28,7 +29,8 @@ def optimize_team(data : pd.DataFrame, constraints : dict):
     
     # Create constraints
     # Total player constraint
-    model += lpSum(players) == number_players
+    model += lpSum(players) <= max_players
+    model += lpSum(players) >= min_players
     
     # Total price constraint
     total_price_constraint = lpSum([players[i] * data['Price'].iloc[i] for i in range(n)]) <= price_cap
@@ -54,7 +56,10 @@ def optimize_team(data : pd.DataFrame, constraints : dict):
     model += total_performance
     
     # Optimize the model
-    model.solve(PULP_CBC_CMD(msg=0)) # PUlP_CBC_CMD is the default solver, msg=0 suppresses the text output
+    status = model.solve(PULP_CBC_CMD(msg=0)) # PUlP_CBC_CMD is the default solver, msg=0 suppresses the text output
+    if status == -1:
+        print("LP MODEL INFEASIBLE")
+        return []
     
     # Get the selected team
     selected_team = [data.index[i] for i in range(len(players)) if value(players[i]) == 1]
