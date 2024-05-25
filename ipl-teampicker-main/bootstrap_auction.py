@@ -72,7 +72,7 @@ def main():
     bootstrapped_auctions['Auction Number'] = 1 # Add the auction number to the first auction
 
     # Boostrap the rest of the auctions
-    for i in range(2, num_auctions):
+    for i in range(2, num_auctions+1):
         new_auction = resample_auction(auction, False)
         new_auction['Auction Number'] = i # Add the auction number to the new auction
         bootstrapped_auctions = pd.concat([bootstrapped_auctions, new_auction], ignore_index=True) # Append the new auction to the previous auctions
