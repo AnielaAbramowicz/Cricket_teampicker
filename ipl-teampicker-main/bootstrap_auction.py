@@ -18,23 +18,26 @@ def resample_auction(auction : pd.DataFrame, reshuffle : bool) -> pd.DataFrame:
         pd.DataFrame : the new auction
     """
 
-    indian_capped_price = auction[(auction['OverseasIndian'] == 'Indian') & (auction['Played For Country'] == 1)]['Selling Price'].tolist()
-    indian_uncapped_price = auction[(auction['OverseasIndian'] == 'Indian') & (auction['Played For Country'] == 0)]['Selling Price'].tolist()
-    international_price = auction[auction['OverseasIndian'] == 'Overseas']['Selling Price'].tolist()
+    indian_capped_price = auction[(auction['OverseasIndian'] == 'Indian') & (auction['Played For Country'] == 1)][['Selling Price', 'Base Price']].to_numpy()
+    indian_uncapped_price = auction[(auction['OverseasIndian'] == 'Indian') & (auction['Played For Country'] == 0)][['Selling Price', 'Base Price']].to_numpy()
+    international_price = auction[auction['OverseasIndian'] == 'Overseas'][['Selling Price', 'Base Price']].to_numpy()
 
     def new_price(row, indian_capped_price, indian_uncapped_price, international_price):
         if row['OverseasIndian'] == 'Overseas':
-            return np.random.choice(international_price)
+            rnum = np.random.randint(international_price.shape[0])
+            return pd.Series([international_price[rnum, 0], international_price[rnum, 1]])
         elif row['Played For Country'] == 0:
-            return np.random.choice(indian_uncapped_price)
+            rnum = np.random.randint(indian_uncapped_price.shape[0])
+            return pd.Series([indian_uncapped_price[rnum, 0], indian_uncapped_price[rnum, 1]])
         else:
-            return np.random.choice(indian_capped_price)
+            rnum = np.random.randint(indian_capped_price.shape[0])
+            return pd.Series([indian_capped_price[rnum, 0], indian_capped_price[rnum, 1]])
 
     new_price_func = partial(new_price, indian_capped_price = indian_capped_price, indian_uncapped_price = indian_uncapped_price, international_price = international_price)
 
     new_auction = auction.copy()
 
-    new_auction['Selling Price'] = new_auction.apply(new_price_func, axis=1)
+    new_auction[['Selling Price', 'Base Price']] = new_auction.apply(new_price_func, axis=1)
 
     if reshuffle:
         new_auction = new_auction.sample(frac=1).reset_index(drop=True)
