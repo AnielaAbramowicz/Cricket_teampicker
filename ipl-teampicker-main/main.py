@@ -3,10 +3,9 @@ import numpy as np
 import os
 
 from auction import Auction, AuctionEvent
-from project_mock_lp import optimize_team
+from lp_solver import optimize_team
 from os import path
 from colorama import init as colorama_init, Fore, Style
-from pp_gen import generate_prices
 
 
 # Get the current working directory
