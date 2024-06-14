@@ -8,12 +8,14 @@ import pickle
 
 path = os.path.dirname(os.path.abspath(__file__))
 
+num_batters = 0
+
 class SimDataHelper:
     """
     Helper class to get statistics from the ball by ball data
     """
 
-    cached_batter_outcomes = {}
+    prior_outcomes = np.array([0.194901, 0.185065, 0.031819, 0.001530, 0.055905, 0.000104, 0.024381, 0.506294])
 
     def __init__(self):
         self.batter_file = pd.read_csv(os.path.join(path, 'batter_runs.csv'))
@@ -70,8 +72,8 @@ class SimDataHelper:
         """
 
         # Check if the data is already cached
-        if (batter, overs, wickets) in self.cached_batter_outcomes:
-            return self.cached_batter_outcomes[(batter, overs, wickets)]
+        #if (batter, overs, wickets) in self.cached_batter_outcomes:
+            #return self.cached_batter_outcomes[(batter, overs, wickets)]
 
         # Filter by batter
         outcomes = self.batter_file[self.batter_file['batter id'] == batter]
@@ -82,7 +84,7 @@ class SimDataHelper:
         # Filter by game stage
         outcomes = outcomes[(outcomes['over'] == overs) & (outcomes['wickets'] == wickets)]
 
-        outcomes = outcomes.drop(columns=['match id', 'batter', 'date', 'extra runs', 'innings'], errors='ignore')
+        outcomes = outcomes.drop(columns=['match id', 'batter', 'date', 'extra runs', 'innings', 'batter id'], errors='ignore')
 
         # Check if outcomes is empty
         # This means the batter has not faced a ball at this game stage
@@ -90,7 +92,7 @@ class SimDataHelper:
             return [0] * 8
 
         # Summing the columns 'wickets_in_over', '1', '2', '3', '4', '5', '6', 'extras' to "squash" the data
-        outcomes = outcomes.groupby(['over', 'batter id', 'wickets'], as_index=False).sum()
+        outcomes = outcomes.groupby(['over', 'wickets'], as_index=False).sum()
 
         # Get the count of 1s, 2s, etc.
         # I want to sum vertically 
@@ -104,7 +106,7 @@ class SimDataHelper:
             results = results / np.sum(results)
 
         # Cache the result
-        self.cached_batter_outcomes[(batter, overs, wickets)] = results
+        #self.cached_batter_outcomes[(batter, overs, wickets)] = results
 
         return results
 
@@ -128,15 +130,11 @@ class SimDataHelper:
                 p_now = outcome_matrix[batter - 1, :-1, wicket, :] 
                 p_next = outcome_matrix[batter - 1, :-1, wicket+1, :]
 
-                # calculating the total deliveries faced by the batter at this wicket and the next
-                # I am going to smooth the probabilities (laplace)
-                n_now = np.sum(p_now, axis=1) + 8
+                p_now, n_now = self.smooth_outcomes(p_now)
+                p_next, n_next = self.smooth_outcomes(p_next)
+
                 n_now_T = n_now[:, np.newaxis]
-                n_next = np.sum(p_next, axis=1) + 8
                 n_next_T = n_next[:, np.newaxis]
-                
-                p_now = p_now + 1
-                p_next = p_next + 1
 
                 p_now = np.divide(p_now.astype(float), n_now_T)
                 p_next = np.divide(p_next.astype(float), n_next_T)
@@ -157,6 +155,11 @@ class SimDataHelper:
 
         return wicket_transition_factors
 
+    def smooth_outcomes(self, outcomes):
+        prior_weight = 1
+        n = np.sum(outcomes, axis=1) + (prior_weight * self.prior_outcomes.sum())
+        return outcomes + (prior_weight * self.prior_outcomes), n
+
     def get_over_transition_factors(self):
 
         # There are not much comments here because idk whats going on tbh
@@ -176,8 +179,11 @@ class SimDataHelper:
         numerator = np.zeros((19, 9, 8))
         denominator = np.zeros((19, 9, 8))
 
+        batter_ids = self.batter_file['batter id'].unique()
+        batter_ids.sort()
+
         # Calculate the variances for each batter
-        for batter in self.batter_file['batter id'].unique():
+        for batter in batter_ids:
             for over in range(1, 20):
                 # we first need the emperical probabilities of batting outcomes at this over and the next, for the current batter
 
@@ -187,25 +193,26 @@ class SimDataHelper:
 
                 # calculating the total deliveries faced by the batter at this over and the next
                 # I am going to smooth the probabilities (laplace)
-                n_now = np.sum(p_now, axis=1) + 8
-                n_now_T = n_now[:, np.newaxis]
-                n_next = np.sum(p_next, axis=1) + 8
-                n_next_T = n_next[:, np.newaxis]
+                #n_now = np.sum(p_now, axis=1)
+                #n_now_T = n_now[:, np.newaxis]
+                #n_next = np.sum(p_next, axis=1) 
+                #n_next_T = n_next[:, np.newaxis]
                 
-                p_now = p_now + 1
-                p_next = p_next + 1
+                p_now, n_now = self.smooth_outcomes(p_now)
+                p_next, n_next = self.smooth_outcomes(p_next)
 
-                p_now = np.divide(p_now.astype(float), n_now_T)
-                p_next = np.divide(p_next.astype(float), n_next_T)
+                n_now_T = n_now[:, np.newaxis]
+                n_next_T = n_next[:, np.newaxis]
+
+                p_now = np.divide(p_now, n_now_T)
+                p_next = np.divide(p_next, n_next_T)
 
                 factors = np.divide(p_next, p_now, out=np.zeros_like(p_next), where=p_now != 0)
 
                 # Calculate variance
-                r1 = np.divide(np.ones_like(p_next) - p_next, n_next_T * p_next, out=np.zeros_like(p_next), where=(p_next != 0) & (n_next_T != 0))
-                r2 = np.divide(np.ones_like(p_now) - p_now, n_now_T * p_now, out=np.zeros_like(p_now), where=(p_now != 0) & (n_now_T != 0))
+                r1 = np.divide(np.ones_like(p_next) - p_next, n_next_T * p_next, out=np.full_like(p_next, np.inf), where=p_next != 0)
+                r2 = np.divide(np.ones_like(p_now) - p_now, n_now_T * p_now, out=np.full_like(p_now, np.inf), where=p_now != 0)
                 v = np.square(factors) * (r1 + r2)
-
-                variances[batter - 1, over - 1, :, :] = v
 
                 numerator[over - 1, :, :] += np.divide(factors, np.sqrt(v), out=np.zeros_like(factors), where=v != 0)
                 denominator[over - 1, :, :] += np.divide(np.ones_like(v), np.sqrt(v), out=np.zeros_like(v), where=v != 0)
@@ -215,11 +222,12 @@ class SimDataHelper:
         return over_transition_factors
 
 
-
 def main():
     # Just for testing
     simdatahelper = SimDataHelper()
-    simdatahelper.get_wicket_transition_factors()
+    #simdatahelper.get_wicket_transition_factors()
+    over_transition_factors = simdatahelper.get_over_transition_factors()
+    print(over_transition_factors[:, 5, 4])
 
 if __name__ == '__main__':
     main()
