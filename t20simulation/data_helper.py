@@ -166,6 +166,9 @@ class SimDataHelper:
         # I am just implementing the estimation of the multiplicative parameters according
         # to the appending of the paper
 
+        #first demensin is the overs
+        #second dimension is the wickets
+        #third dimension is the outcomes
         over_transition_factors = np.ndarray((20, 10,  8))
 
         # We need to calculate the transition factors for each batter
@@ -220,7 +223,54 @@ class SimDataHelper:
         over_transition_factors = np.divide(numerator, denominator, out=np.zeros_like(numerator), where=denominator != 0)
 
         return over_transition_factors
+    
 
+    def calculate_taus_compressed(self, over_transition_factors : np.ndarray, wicket_transition_factors : np.ndarray) -> np.ndarray:
+        #initiate the matrix and set the baseline element to the all 1s vector
+        taus = np.zeros(over_transition_factors.shape)
+        taus[7, 0, :] = np.ones(8)
+        #compress the over transition factors and wicket transition factors
+        over_transition_factors_compressed = np.mean(over_transition_factors, axis=1) #average along the wickets
+        wicket_transition_factors_compressed = np.mean(wicket_transition_factors, axis=0) #average along the overs
+
+        #for all the taus they are calculated by going from the baseline element to the current element
+        for over in range(8, 20):
+            #multitply each over compressed transition factor with the compressed previous transition factor
+            over_transition_factors_compressed[over, :] = np.multiply(over_transition_factors_compressed[over, :], over_transition_factors_compressed[over - 1, :])
+        for over in range(7, 0):
+            #devide each over compressed transition factor with the compressed next transition factor
+            over_transition_factors_compressed[over, :] = np.divide(over_transition_factors_compressed[over, :], over_transition_factors_compressed[over + 1, :])
+        #now we have a matrix which stores the effects of transition in the over direction
+        #we do the same for the wicket transition factors
+        for wicket in range(1, 10):
+            wicket_transition_factors_compressed[wicket, :] = np.multiply(wicket_transition_factors_compressed[wicket, :], wicket_transition_factors_compressed[wicket - 1, :])
+        
+        #now calculate the taus by multiplying the over and wicket transition factors
+        for over in range(0, 20):
+            for wicket in range(0, 10):
+                taus[over, wicket, :] = np.multiply(over_transition_factors_compressed[over, :], wicket_transition_factors_compressed[wicket, :])
+        
+        return taus
+    
+    def calculate_taus(self) -> np.ndarray:
+        taus = np.zeros(20,10,8)
+        taus[7, 0, :] = np.ones(8)
+        #populate every element in taus by calling calculate one tau with the correct arguments
+        
+    
+    #this is most likely super inneficient but it works for now and we only calcuate the tau matrix once
+    def calculate_one_tau(self, wicket : int, over : int, over_transition_factors : np.ndarray, wicket_transition_factors : np.ndarray) -> float:
+        over_factor = np.ones(8)
+        if over > 7:
+            for i in range(7, over):
+                over_factor = np.multiply(over_factor, over_transition_factors[i, wicket, :])
+        else:
+            for i in range(7,0):
+                over_factor = np.divide(over_factor, over_transition_factors[i, wicket, :])
+        wicket_factor = np.ones(8)
+        for i in range(0,wicket):
+            wicket_factor = np.multiply(wicket_factor, wicket_transition_factors[over, i, :])
+        return np.multiply(over_factor, wicket_factor)
 
 def main():
     # Just for testing
