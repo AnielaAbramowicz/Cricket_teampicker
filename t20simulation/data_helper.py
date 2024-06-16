@@ -255,7 +255,14 @@ class SimDataHelper:
     def calculate_taus(self) -> np.ndarray:
         taus = np.zeros(20,10,8)
         taus[7, 0, :] = np.ones(8)
+        transition_factors_overs = self.get_over_transition_factors() 
+        transition_factors_wickets = self.get_wicket_transition_factors()
         #populate every element in taus by calling calculate one tau with the correct arguments
+        for over in range(0, 20):
+            for wicket in range(0, 10):
+                taus[over, wicket, :] = self.calculate_one_tau(wicket, over, transition_factors_overs, transition_factors_wickets)
+        return taus
+    
         
     
     #this is most likely super inneficient but it works for now and we only calcuate the tau matrix once
