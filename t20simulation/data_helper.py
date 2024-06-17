@@ -320,18 +320,6 @@ class SimDataHelper:
 
         # all variances is a 4d array of shape (n_batters, 19, 10, 8)
         smallest_variances = np.min(all_variances)
-        # Find factor with smallest variance
-        #for batter in range(len(batter_ids)):
-        #    for over in range(1, 20):
-        #        for wicket in range(0, 10):
-        #            for run in range(0, 8):
-        #                if all_variances[batter, over-1, wicket, run] == smallest_variances:
-        #                    print(f"Batter: {batter_ids[batter]}")
-        #                    print(f"Over: {over}")
-        #                    print(f"Wicket: {wicket}")
-        #                    print(f"Outcome: {run}")
-        #                    print(f"Factor with smallest variance: {all_factors[batter, over-1, wicket, run]}")
-
         over_transition_factors = np.divide(numerator, denominator, out=np.full_like(numerator, np.nan), where=denominator != 0)
 
         # Pickle the matrix
@@ -353,70 +341,6 @@ class SimDataHelper:
                 transition_factors[over-1, wicket, :] /= product
 
         return transition_factors
-
-    def get_taus(self):    
-        over_transition_factors = self.get_over_transition_factors_simple(recalculate=True)
-        #over_transition_factors = self.scale_over_transition_factors(over_transition_factors)
-        wicket_transition_factors = self.get_wicket_transition_factors_simple()
-
-        # Average the transition factors
-        over_transition_factors = np.mean(over_transition_factors, axis=1)
-        wicket_transition_factors = np.mean(wicket_transition_factors, axis=0)
-
-        taus = np.ones((20, 10, 8))
-
-        # Calculate the taus relative to the seventh over and zero wickets
-        taus[6, 0, :] = np.ones(8)
-
-        for over in range(0, 7):
-            for wicket in range(0, 9):
-                tau = np.ones(8)
-                for i in range(5, over-1, -1):
-                    tau /= over_transition_factors[i, :]
-                for i in range(0, wicket):
-                    tau *= wicket_transition_factors[i, :]
-                taus[over, wicket, :] = tau
-
-
-        for over in range(7, 20):
-            for wicket in range(0, 9):
-                tau = np.ones(8)
-                for i in range(6, over):
-                    tau *= over_transition_factors[i, :]
-                for i in range(0, wicket):
-                    tau *= wicket_transition_factors[i, :]
-                taus[over, wicket, :] = tau
-
-        #for over in range(0, 20):
-        #    for wicket in range(0, 9):
-        #        if over == 0 and wicket == 0:
-        #            continue
-        #        elif over == 0:
-        #            taus[over, wicket, :] = wicket_transition_factors[over, wicket-1, :]
-        #        elif wicket == 0:
-        #            taus[over, wicket, :] = over_transition_factors[over-1, wicket, :]
-        #        else:
-        #            taus[over, wicket, :] = over_transition_factors[over-1, wicket, :] * wicket_transition_factors[over, wicket-1, :]
-
-
-        #for over in range(1, 20):
-        #    for wicket in range(0, 9):
-        #        cur_over = 1
-        #        cur_wicket = 0
-        #        while(cur_over < over or cur_wicket < wicket):
-        #            if cur_over < over and cur_wicket < wicket:
-        #                taus[over-1,wicket,:] *= over_transition_factors[cur_over-1, cur_wicket, :]
-        #                taus[over-1,wicket,:] *= wicket_transition_factors[cur_over-1, cur_wicket, :]
-        #                cur_over += 1
-        #                cur_wicket += 1 
-        #            elif cur_over < over:
-        #                taus[over-1,wicket,:] *= over_transition_factors[cur_over-1, cur_wicket, :]
-        #                cur_over += 1
-        #            elif cur_wicket < wicket:
-        #                taus[over-1,wicket,:] *= wicket_transition_factors[cur_over-1, cur_wicket, :]
-        #                cur_wicket += 1
-
-        return taus
 
     def calculate_taus_compressed(self) -> np.ndarray:
         #initiate the matrix and set the baseline element to the all 1s vector
@@ -454,8 +378,6 @@ class SimDataHelper:
                 taus[over, wicket, :] = self.calculate_one_tau(wicket, over)
         return taus
     
-        
-    
     #this is most likely super inneficient but it works for now and we only calcuate the tau matrix once
     def calculate_one_tau(self, wicket : int, over : int) -> float:
         if over == 6 and wicket  == 0:
@@ -477,10 +399,9 @@ def main():
     simdatahelper = SimDataHelper()
     #simdatahelper.get_wicket_transition_factors()
     #over_transition_factors = simdatahelper.get_over_transition_factors()
-    taus = simdatahelper.get_taus()
+    taus = simdatahelper.calculate_taus()
 
     baselines = simdatahelper.prior_outcomes
-
 
     n_games = 20
     total_runs = 0
