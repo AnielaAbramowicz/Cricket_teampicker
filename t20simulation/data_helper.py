@@ -224,11 +224,13 @@ class SimDataHelper:
         for over in range(0, 20):
             for wicket in range(0, 10):
                 taus[over, wicket, :] = np.multiply(over_transition_factors_compressed[over, :], wicket_transition_factors_compressed[wicket, :])
+
+        taus[np.isnan(taus)] = 0
         
         return taus
     
     def calculate_taus(self) -> np.ndarray:
-        taus = np.zeros(20,10,8)
+        taus = np.zeros((20,10,8))
         taus[6, 0, :] = np.ones(8)
         #populate every element in taus by calling calculate one tau with the correct arguments
         for over in range(0, 20):
@@ -250,14 +252,14 @@ class SimDataHelper:
                 over_factor = np.divide(over_factor, self.get_over_transition_factors()[i, wicket, :])
         for i in range(0,wicket):
             wicket_factor = np.multiply(wicket_factor, self.get_wicket_transition_factors()[over, i, :])
-        return np.multiply(over_factor, wicket_factor)
+        return np.multiply(over_factor, wicket_factor, out=np.zeros(8), where=(over_factor != np.inf) & (wicket_factor != np.inf) & (over_factor != 0) & (wicket_factor != 0))
 
 def main():
     # Just for testing
     simdatahelper = SimDataHelper()
     #simdatahelper.get_wicket_transition_factors()
     #over_transition_factors = simdatahelper.get_over_transition_factors()
-    taus = simdatahelper.calculate_taus()
+    taus = simdatahelper.calculate_taus_compressed()
 
     baselines = simdatahelper.prior_outcomes
 
@@ -277,6 +279,8 @@ def main():
 
             # Get the probabilities of each outcome
             p = (baselines * taus[over-1, wickets, :]) / np.sum(baselines * taus[over-1, wickets, :])
+
+            p[np.isnan(p)] = 0
 
             # Get the outcome
             outcome = np.random.choice(8, p=p)
