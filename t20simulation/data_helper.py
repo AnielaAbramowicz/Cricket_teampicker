@@ -21,10 +21,42 @@ class SimDataHelper:
 
     emperical_outcomes_by_over = np.zeros((20, 8))
 
+    batter_outcomes_matrix = None
+    taus = None
+
     def __init__(self):
         self.batter_file = pd.read_csv(os.path.join(path, 'batter_runs.csv'))
 
-    def create_batter_outcome_matrix(self, normalize=False, ignore_cache=False) -> np.ndarray:
+    def get_outcomes_for_batter(self, batter : int) -> np.ndarray:
+        """
+        Get the outcomes of a batter
+
+        Parameters:
+        batter (int): ID of the batter (>= 1)
+
+        Returns:
+        pd.DataFrame: A DataFrame containing the outcomes of the batter
+        """
+
+        if self.batter_outcomes_matrix is None:
+            self.batter_outcomes_matrix = self.__create_batter_outcome_matrix()
+
+        return self.batter_outcomes_matrix[batter - 1]
+
+    def get_taus(self) -> np.ndarray:
+        """
+        Get the taus, multiplicative parameters used to scale outcome probabilities to different game stages.
+
+        Returns:
+        np.ndarray: A matrix (20x10) containing the taus for each over,wicket game stage.
+        """
+
+        if self.taus is None:
+            self.taus = self.__calculate_taus()
+
+        return self.taus
+
+    def __create_batter_outcome_matrix(self, normalize=False, ignore_cache=False) -> np.ndarray:
         """
         Create a matrix containing the outcome frequencies of each batter at each game stage
 
@@ -50,7 +82,7 @@ class SimDataHelper:
             for overs in range(1, 21):
                 for wickets in range(0, 10):
                     # Get the outcome frequencies of the batter at the game stage
-                    outcomes = self.get_batter_outcomes_at_gamestage(batter, overs, wickets, normalize)
+                    outcomes = self.__get_batter_outcomes_at_gamestage(batter, overs, wickets, normalize)
 
                     # Store the outcome frequencies in the matrix
                     batter_outcome_matrix[batter - 1, overs - 1, wickets, :] = outcomes
@@ -61,7 +93,7 @@ class SimDataHelper:
 
         return batter_outcome_matrix
 
-    def get_batter_outcomes_at_gamestage(self, batter : int, overs : int, wickets : int, normalize=False) -> np.ndarray[int]:
+    def __get_batter_outcomes_at_gamestage(self, batter : int, overs : int, wickets : int, normalize=False) -> np.ndarray[int]:
         """
         Get the outcomes of a batter at a given game stage
 
@@ -108,15 +140,15 @@ class SimDataHelper:
 
         return results
 
-    def smooth_outcomes(self, outcomes):
+    def __smooth_outcomes(self, outcomes):
         prior_weight = 0
         n = np.sum(outcomes, axis=1) + (prior_weight * self.prior_outcomes.sum())
         return outcomes + (prior_weight * self.prior_outcomes), n
 
-    def smooth_transition_factors(self, factors):
+    def __smooth_transition_factors(self, factors):
         smoothed = np.zeros_like(factors)
 
-        sigma=2
+        sigma=1
 
         # Create two arrays, one with nans replaced with zeros
         # and one with 1s everywhere besides nans which are 0
@@ -134,7 +166,7 @@ class SimDataHelper:
 
         return smoothed
 
-    def get_wicket_transition_factors(self, recalculate=False):
+    def __get_wicket_transition_factors(self, recalculate=False):
 
         # Check if pickled
         if not recalculate and os.path.exists(os.path.join(path, 'pickle_jar/wicket_transition_factors.pkl')):
@@ -143,7 +175,7 @@ class SimDataHelper:
 
         wicket_transition_factors = np.zeros((20, 10,  8))
 
-        outcome_matrix = self.create_batter_outcome_matrix(ignore_cache=False)
+        outcome_matrix = self.__create_batter_outcome_matrix(ignore_cache=False)
 
         # Sum the outcomes across all batters
         outcome_matrix = np.sum(outcome_matrix, axis=0)
@@ -159,7 +191,7 @@ class SimDataHelper:
             wicket_transition_factors[:, wicket, :] = factors
 
         # Smooth the transition factors
-        wicket_transition_factors = self.smooth_transition_factors(wicket_transition_factors)
+        wicket_transition_factors = self.__smooth_transition_factors(wicket_transition_factors)
 
         # Cache the transition factors
         with open(os.path.join(path, 'pickle_jar/wicket_transition_factors.pkl'), 'wb') as f:
@@ -168,7 +200,7 @@ class SimDataHelper:
         return wicket_transition_factors
 
 
-    def get_over_transition_factors(self, recalculate=False):
+    def __get_over_transition_factors(self, recalculate=False):
 
         # Check if pickled
         if not recalculate and os.path.exists(os.path.join(path, 'pickle_jar/over_transition_factors.pkl')):
@@ -177,7 +209,7 @@ class SimDataHelper:
 
         over_transition_factors = np.zeros((20, 10,  8))
 
-        outcome_matrix = self.create_batter_outcome_matrix(ignore_cache=False)
+        outcome_matrix = self.__create_batter_outcome_matrix(ignore_cache=False)
 
         # Sum the outcomes across all batters
         outcome_matrix = np.sum(outcome_matrix, axis=0)
@@ -193,7 +225,7 @@ class SimDataHelper:
             over_transition_factors[over-1, :, :] = factors
 
         # Smooth the transition factors
-        over_transition_factors = self.smooth_transition_factors(over_transition_factors)
+        over_transition_factors = self.__smooth_transition_factors(over_transition_factors)
 
         # Cache the transition factors
         with open(os.path.join(path, 'pickle_jar/over_transition_factors.pkl'), 'wb') as f:
@@ -201,13 +233,13 @@ class SimDataHelper:
 
         return over_transition_factors
 
-    def calculate_taus_compressed(self, over_transition_factors : np.ndarray = None, wicket_transition_factors : np.ndarray = None) -> np.ndarray:
+    def __calculate_taus_compressed(self, over_transition_factors : np.ndarray = None, wicket_transition_factors : np.ndarray = None) -> np.ndarray:
         #default values for the matrices are the ones calculated by the helper,
         #for testing perposes we can pass in custom matrices
         if over_transition_factors is None:
-            over_transition_factors = self.get_over_transition_factors()
+            over_transition_factors = self.__get_over_transition_factors()
         if wicket_transition_factors is None:
-            wicket_transition_factors = self.get_wicket_transition_factors()
+            wicket_transition_factors = self.__get_wicket_transition_factors()
 
         #initiate the matrix and set the baseline element to the all 1s vector
         taus = np.zeros(over_transition_factors)
@@ -237,27 +269,27 @@ class SimDataHelper:
         
         return taus
     
-    def calculate_taus(self, over_transition_factors : np.ndarray = None, wicket_transition_factors : np.ndarray = None) -> np.ndarray:
+    def __calculate_taus(self, over_transition_factors : np.ndarray = None, wicket_transition_factors : np.ndarray = None) -> np.ndarray:
         #default values for the matrices are the ones calculated by the helper,
         #for testing perposes we can pass in custom matrices
         if over_transition_factors is None:
-            over_transition_factors = self.get_over_transition_factors()
+            over_transition_factors = self.__get_over_transition_factors()
         if wicket_transition_factors is None:
-            wicket_transition_factors = self.get_wicket_transition_factors()
+            wicket_transition_factors = self.__get_wicket_transition_factors()
 
         taus = np.zeros((20,10,8))
         taus[6, 0, :] = np.ones(8)
         #populate every element in taus by calling calculate one tau with the correct arguments
         for over in range(0, 20):
             for wicket in range(0, 10):
-                taus[over, wicket, :] = self.calculate_one_tau(wicket, over, over_transition_factors, wicket_transition_factors)
+                taus[over, wicket, :] = self.__calculate_one_tau(wicket, over, over_transition_factors, wicket_transition_factors)
 
         taus[np.isnan(taus)] = 0 
 
         return taus
     
     #this is most likely super inneficient but it works for now and we only calcuate the tau matrix once
-    def calculate_one_tau(self, wicket : int, over : int, over_factors : np.ndarray, wicket_factors : np.ndarray) -> float:
+    def __calculate_one_tau(self, wicket : int, over : int, over_factors : np.ndarray, wicket_factors : np.ndarray) -> float:
         if over == 6 and wicket  == 0:
             return np.ones(8)
         over_factor = np.ones(8)
@@ -277,7 +309,7 @@ def main():
     simdatahelper = SimDataHelper()
     #simdatahelper.get_wicket_transition_factors()
     #over_transition_factors = simdatahelper.get_over_transition_factors()
-    taus = simdatahelper.calculate_taus()
+    taus = simdatahelper.get_taus()
 
     baselines = simdatahelper.prior_outcomes_baseline
 

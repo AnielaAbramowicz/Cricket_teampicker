@@ -11,14 +11,14 @@ class TestCalculateCompressedTaus(unittest.TestCase):
         wicket_transition_factors = np.ones((20, 10, 8))
         overs_transition_factors = np.ones((20, 10, 8))
         helper = SimDataHelper()
-        compressed_taus = helper.calculate_taus_compressed(overs_transition_factors, wicket_transition_factors)
+        compressed_taus = helper.__calculate_taus_compressed(overs_transition_factors, wicket_transition_factors)
         self.assertTrue(np.allclose(compressed_taus, np.ones((20, 10, 8))))
 
     def test_zeros_and_ones(self):
         wicket_transition_factors = np.zeros((20, 10, 8))
         overs_transition_factors = np.ones((20, 10, 8))
         helper = SimDataHelper()
-        compressed_taus = helper.calculate_taus_compressed(overs_transition_factors, wicket_transition_factors)
+        compressed_taus = helper.__calculate_taus_compressed(overs_transition_factors, wicket_transition_factors)
         self.assertTrue(np.allclose(compressed_taus, np.zeros((20, 10, 8))))
 
     if __name__ == '__main__':
