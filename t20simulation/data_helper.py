@@ -17,6 +17,7 @@ class SimDataHelper:
     """
 
     prior_outcomes = np.array([0.400795, 0.340703, 0.065071, 0.003958, 0.097477, 0.000188, 0.041134, 0.050673])
+    prior_outcomes_baseline = np.array([0.353, 0.448615, 0.069696, 0.003433, 0.074731, 0, 0.034676, 0.01])
 
     emperical_outcomes_by_over = np.zeros((20, 8))
 
@@ -115,7 +116,7 @@ class SimDataHelper:
     def smooth_transition_factors(self, factors):
         smoothed = np.zeros_like(factors)
 
-        sigma=1
+        sigma=2
 
         # Create two arrays, one with nans replaced with zeros
         # and one with 1s everywhere besides nans which are 0
@@ -236,6 +237,9 @@ class SimDataHelper:
         for over in range(0, 20):
             for wicket in range(0, 10):
                 taus[over, wicket, :] = self.calculate_one_tau(wicket, over)
+
+        taus[np.isnan(taus)] = 0 
+
         return taus
     
     #this is most likely super inneficient but it works for now and we only calcuate the tau matrix once
@@ -259,15 +263,17 @@ def main():
     simdatahelper = SimDataHelper()
     #simdatahelper.get_wicket_transition_factors()
     #over_transition_factors = simdatahelper.get_over_transition_factors()
-    taus = simdatahelper.calculate_taus_compressed()
+    taus = simdatahelper.calculate_taus()
 
-    baselines = simdatahelper.prior_outcomes
+    baselines = simdatahelper.prior_outcomes_baseline
 
-    n_games = 20
+    n_games = 1000
     total_runs = 0
     outcomes = np.zeros((20, 8))
 
-    for _ in range(n_games):
+    for i in range(n_games):
+
+        print(f"Simulating game {i+1}...\t", end='\r')
 
         # Simulate a match
         ball_number = 0
@@ -301,7 +307,8 @@ def main():
 
     print(f"Final score: {score}/{wickets} in {ball_number//6}.{ball_number%6} overs")
 
-
+    # Save outcomes to a csv file
+    pd.DataFrame(outcomes).to_csv('outcomes_from_sim.csv')
 
 if __name__ == '__main__':
     main()
