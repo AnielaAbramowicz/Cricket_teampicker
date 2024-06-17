@@ -250,7 +250,7 @@ class SimDataHelper:
         #populate every element in taus by calling calculate one tau with the correct arguments
         for over in range(0, 20):
             for wicket in range(0, 10):
-                taus[over, wicket, :] = self.calculate_one_tau(wicket, over)
+                taus[over, wicket, :] = self.calculate_one_tau(wicket, over, over_transition_factors, wicket_transition_factors)
 
         taus[np.isnan(taus)] = 0 
 
@@ -267,9 +267,9 @@ class SimDataHelper:
                 over_factor = np.multiply(over_factor, over_factors[i, wicket, :])
         else:
             for i in range(5, over-1,-1):
-                over_factor = np.divide(over_factor, over_factors()[i, wicket, :])
+                over_factor = np.divide(over_factor, over_factors[i, wicket, :])
         for i in range(0,wicket):
-            wicket_factor = np.multiply(wicket_factor, wicket_factors()[over, i, :])
+            wicket_factor = np.multiply(wicket_factor, wicket_factors[over, i, :])
         return np.multiply(over_factor, wicket_factor, out=np.zeros(8), where=(over_factor != np.inf) & (wicket_factor != np.inf) & (over_factor != 0) & (wicket_factor != 0))
 
 def main():
