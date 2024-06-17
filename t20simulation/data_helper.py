@@ -74,10 +74,6 @@ class SimDataHelper:
         np.ndarray: A list containing the outcome frequencies of the batter at the given game stage, where the first seven indices correspond to the number of runs scored and the last index corresponds to the number of dismissals
         """
 
-        # Check if the data is already cached
-        #if (batter, overs, wickets) in self.cached_batter_outcomes:
-            #return self.cached_batter_outcomes[(batter, overs, wickets)]
-
         # Filter by batter
         outcomes = self.batter_file[self.batter_file['batter id'] == batter]
 
@@ -109,92 +105,12 @@ class SimDataHelper:
         if normalize:
             results = results / np.sum(results)
 
-        # Cache the result
-        #self.cached_batter_outcomes[(batter, overs, wickets)] = results
-
         return results
-
-    def get_wicket_transition_factors(self, recalculate=False):
-
-        # Check if pickled
-        if not recalculate and os.path.exists(os.path.join(path, 'pickle_jar/wicket_transition_factors.pkl')):
-            with open(os.path.join(path, 'pickle_jar/wicket_transition_factors.pkl'), 'rb') as f:
-                return pickle.load(f)
-
-        wicket_transition_factors = np.zeros((20, 10,  8))
-
-        # We need to calculate the transition factors for each batter
-        outcome_matrix = self.create_batter_outcome_matrix()
-
-        numerator = np.zeros((20, 9, 8))
-        denominator = np.zeros((20, 9, 8))
-
-        # Calculate the variances for each batter
-        for batter in self.batter_file['batter id'].unique():
-            for wicket in range(0, 9):
-                # we first need the emperical probabilities of batting outcomes at this wicket and the next, for the current batter
-
-                # these are 2d arrays of shape (10, 8)
-                p_now = outcome_matrix[batter - 1, :, wicket, :] 
-                p_next = outcome_matrix[batter - 1, :, wicket+1, :]
-
-                p_now, n_now = self.smooth_outcomes(p_now)
-                p_next, n_next = self.smooth_outcomes(p_next)
-
-                n_now_T = n_now[:, np.newaxis]
-                n_next_T = n_next[:, np.newaxis]
-
-                p_now = np.divide(p_now.astype(float), n_now_T)
-                p_next = np.divide(p_next.astype(float), n_next_T)
-
-                factors = np.divide(p_next, p_now, out=np.zeros_like(p_next), where=p_now != 0)
-
-                # Calculate variance
-                r1 = np.divide(np.ones_like(p_next) - p_next, n_next_T * p_next, out=np.zeros_like(p_next), where=(p_next != 0) & (n_next_T != 0))
-                r2 = np.divide(np.ones_like(p_now) - p_now, n_now_T * p_now, out=np.zeros_like(p_now), where=(p_now != 0) & (n_now_T != 0))
-                v = np.square(factors) * (r1 + r2)
-
-                numerator[:, wicket, :] += np.divide(factors, np.sqrt(v), out=np.zeros_like(factors), where=v != 0)
-                denominator[:, wicket, :] += np.divide(np.ones_like(v), np.sqrt(v), out=np.zeros_like(v), where=v != 0)
-
-        wicket_transition_factors = np.divide(numerator, denominator, out=np.zeros_like(numerator), where=denominator != 0)
-
-        # Pickle
-        with open(os.path.join(path, 'pickle_jar/wicket_transition_factors.pkl'), 'wb') as f:
-            f.write(pickle.dumps(wicket_transition_factors))
-
-        return wicket_transition_factors
 
     def smooth_outcomes(self, outcomes):
         prior_weight = 0
         n = np.sum(outcomes, axis=1) + (prior_weight * self.prior_outcomes.sum())
         return outcomes + (prior_weight * self.prior_outcomes), n
-
-    def get_wicket_transition_factors_simple(self, recalculate=False):
-
-        # Check if pickled
-        if not recalculate and os.path.exists(os.path.join(path, 'pickle_jar/wicket_transition_factors_simple.pkl')):
-            with open(os.path.join(path, 'pickle_jar/wicket_transition_factors_simple.pkl'), 'rb') as f:
-                return pickle.load(f)
-
-        wicket_transition_factors = np.zeros((20, 10,  8))
-
-        outcome_matrix = self.create_batter_outcome_matrix(ignore_cache=False)
-
-        # Sum the outcomes across all batters
-        outcome_matrix = np.sum(outcome_matrix, axis=0)
-
-        # Normalize the outcome matrix
-        sums = np.sum(outcome_matrix, axis=2)
-        outcome_matrix = np.divide(outcome_matrix, sums[:, :, np.newaxis], out=np.zeros_like(outcome_matrix), where=sums[:, :, np.newaxis] != 0)
-
-        # Calculate the transition factors for each wicket
-        for wicket in range(0, 9):
-            factors = np.divide(outcome_matrix[:, wicket+1, :], outcome_matrix[:, wicket, :], out=np.full_like(outcome_matrix[:, wicket+1, :], np.nan), where=outcome_matrix[:, wicket, :] != 0)
-
-            wicket_transition_factors[:, wicket, :] = factors
-
-        return wicket_transition_factors
 
     def smooth_transition_factors(self, factors):
         smoothed = np.zeros_like(factors)
@@ -217,11 +133,45 @@ class SimDataHelper:
 
         return smoothed
 
-    def get_over_transition_factors_simple(self, recalculate=False):
+    def get_wicket_transition_factors(self, recalculate=False):
 
         # Check if pickled
-        if not recalculate and os.path.exists(os.path.join(path, 'pickle_jar/over_transition_factors_simple.pkl')):
-            with open(os.path.join(path, 'pickle_jar/over_transition_factors_simple.pkl'), 'rb') as f:
+        if not recalculate and os.path.exists(os.path.join(path, 'pickle_jar/wicket_transition_factors.pkl')):
+            with open(os.path.join(path, 'pickle_jar/wicket_transition_factors.pkl'), 'rb') as f:
+                return pickle.load(f)
+
+        wicket_transition_factors = np.zeros((20, 10,  8))
+
+        outcome_matrix = self.create_batter_outcome_matrix(ignore_cache=False)
+
+        # Sum the outcomes across all batters
+        outcome_matrix = np.sum(outcome_matrix, axis=0)
+
+        # Normalize the outcome matrix
+        sums = np.sum(outcome_matrix, axis=2)
+        outcome_matrix = np.divide(outcome_matrix, sums[:, :, np.newaxis], out=np.zeros_like(outcome_matrix), where=sums[:, :, np.newaxis] != 0)
+
+        # Calculate the transition factors for each wicket
+        for wicket in range(0, 9):
+            factors = np.divide(outcome_matrix[:, wicket+1, :], outcome_matrix[:, wicket, :], out=np.full_like(outcome_matrix[:, wicket+1, :], np.nan), where=outcome_matrix[:, wicket, :] != 0)
+
+            wicket_transition_factors[:, wicket, :] = factors
+
+        # Smooth the transition factors
+        wicket_transition_factors = self.smooth_transition_factors(wicket_transition_factors)
+
+        # Cache the transition factors
+        with open(os.path.join(path, 'pickle_jar/wicket_transition_factors.pkl'), 'wb') as f:
+            f.write(pickle.dumps(wicket_transition_factors))
+
+        return wicket_transition_factors
+
+
+    def get_over_transition_factors(self, recalculate=False):
+
+        # Check if pickled
+        if not recalculate and os.path.exists(os.path.join(path, 'pickle_jar/over_transition_factors.pkl')):
+            with open(os.path.join(path, 'pickle_jar/over_transition_factors.pkl'), 'rb') as f:
                 return pickle.load(f)
 
         over_transition_factors = np.zeros((20, 10,  8))
@@ -244,103 +194,11 @@ class SimDataHelper:
         # Smooth the transition factors
         over_transition_factors = self.smooth_transition_factors(over_transition_factors)
 
-        return over_transition_factors
-
-    def get_over_transition_factors(self, recalculate=False):
-
-        # Check if pickled
-        if not recalculate and os.path.exists(os.path.join(path, 'pickle_jar/over_transition_factors.pkl')):
-            with open(os.path.join(path, 'pickle_jar/over_transition_factors.pkl'), 'rb') as f:
-                return pickle.load(f)
-
-        # There are not much comments here because idk whats going on tbh
-        # I am just implementing the estimation of the multiplicative parameters according
-        # to the appending of the paper
-
-        over_transition_factors = np.zeros((20, 10,  8))
-
-        # We need to calculate the transition factors for each batter
-
-        # Small constant for regularization
-        epsilon = 1e-6
-
-        outcome_matrix = self.create_batter_outcome_matrix(ignore_cache=False)
-
-        numerator = np.zeros((19, 10, 8))
-        denominator = np.zeros((19, 10, 8))
-
-        #average_factors = np.zeros((19, 10, 8))
-
-        batter_ids = self.batter_file['batter id'].unique()
-        batter_ids.sort()
-
-        all_factors = np.zeros((len(batter_ids), 19, 10, 8))
-        all_variances = np.zeros((len(batter_ids), 19, 10, 8))
-
-        for batter in batter_ids:
-            for over in range(1, 20):
-                # we first need the emperical probabilities of batting outcomes at this over and the next, for the current batter
-
-                # these are 2d arrays of shape (10, 8)
-                p_now = outcome_matrix[batter - 1, over - 1, :, :] 
-                p_next = outcome_matrix[batter - 1, over, :, :]
-
-                p_now, n_now = self.smooth_outcomes(p_now)
-                p_next, n_next = self.smooth_outcomes(p_next)
-
-                n_now_T = n_now[:, np.newaxis]
-                n_next_T = n_next[:, np.newaxis]
-
-                p_now = np.divide(p_now, n_now_T, out=np.zeros_like(p_now), where=n_now_T != 0)
-                p_next = np.divide(p_next, n_next_T, out=np.zeros_like(p_next), where=n_next_T != 0)
-
-                factors = np.divide(p_next, p_now, out=np.zeros_like(p_next), where=p_now != 0)
-                all_factors[batter-1, over-1, :, :] = factors
-                #average_factors[over - 1, :, :] += factors
-
-                # Calculate variance
-                r1 = np.divide(np.ones_like(p_next) - p_next, n_next_T * p_next, out=np.full_like(p_next, np.inf), where=p_next != 0)
-                r2 = np.divide(np.ones_like(p_now) - p_now, n_now_T * p_now, out=np.full_like(p_now, np.inf), where=p_now != 0)
-                v = np.multiply(np.square(factors), (r1 + r2), out=np.full_like(factors, np.inf), where=(r1 != np.inf) & (r2 != np.inf))
-
-                all_variances[batter-1, over-1, :, :] = v
-
-                if 0 in v:
-                    print(f"Batter: {batter}")
-                    print(f"Over: {over}")
-                    print(f"Variance: {v}")
-
-                numerator[over - 1, :, :] += np.divide(factors, np.sqrt(v), out=np.zeros_like(factors), where=~np.isinf(v))
-                
-                denominator[over - 1, :, :] += np.divide(np.ones_like(v), np.sqrt(v), out=np.zeros_like(v), where=~np.isinf(v))
-
-                pass
-
-
-
-        # all variances is a 4d array of shape (n_batters, 19, 10, 8)
-        smallest_variances = np.min(all_variances)
-        over_transition_factors = np.divide(numerator, denominator, out=np.full_like(numerator, np.nan), where=denominator != 0)
-
-        # Pickle the matrix
+        # Cache the transition factors
         with open(os.path.join(path, 'pickle_jar/over_transition_factors.pkl'), 'wb') as f:
             f.write(pickle.dumps(over_transition_factors))
 
         return over_transition_factors
-
-    def scale_over_transition_factors(self, transition_factors):
-        # I want to scale it so that the product of the factors on the path from 1,0 to 7,0 is 1
-        # This is because the factors are multiplicative
-
-        # Calculate the product of the factors on the path from 1,0 to 7,0
-        product = np.prod(transition_factors[0:6, 0, :], axis=0)
-
-        # Scale the factors
-        for over in range(1, 20):
-            for wicket in range(0, 10):
-                transition_factors[over-1, wicket, :] /= product
-
-        return transition_factors
 
     def calculate_taus_compressed(self) -> np.ndarray:
         #initiate the matrix and set the baseline element to the all 1s vector
