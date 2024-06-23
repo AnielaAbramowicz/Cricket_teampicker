@@ -322,13 +322,14 @@ class SimDataHelper:
                 taus[over, wicket] = self._calculate_one_tau_compressed(wicket, over, over_transition_factors, wicket_transition_factors)
 
         taus[np.isnan(taus)] = 0 
+
         return taus
 
 
     def _calculate_one_tau_compressed(self, wicket: int, over: int, over_factors: np.ndarray, wicket_factors: np.ndarray) -> np.ndarray:
         # First compress the necessary parts of the matrices
         if over == 6 and wicket == 0:
-            return np.ones(8)
+            return np.ones((1, 8))
         
         if over > 6:
             if wicket == 0:
@@ -351,7 +352,6 @@ class SimDataHelper:
                 wicket_factors_new = wicket_factors[over:7, 0 : wicket, :]
                 
             compressed_over_factors = np.ones((1, 8))
-            print("wicket factors new", wicket_factors_new)
 
         if over != 6:
             compressed_over_factors = np.mean(over_factors_new, axis=1)
@@ -372,13 +372,7 @@ class SimDataHelper:
             for i in range(6 - over):
                 over_factor = np.divide(over_factor, compressed_over_factors[i])
         for i in range(wicket):
-            print("wicket", wicket)
-            print("over", over)
             wicket_factor = np.multiply(wicket_factor, compressed_wicket_factors[i])
-            
-        if over == 6: 
-            print("over factor", over_factor)
-            print("wicket factor", wicket_factor)
 
         tau = np.multiply(over_factor, wicket_factor, out=np.zeros_like(over_factor), where=(over_factor != np.inf) & (wicket_factor != np.inf) & (over_factor != 0) & (wicket_factor != 0))
 
@@ -387,12 +381,15 @@ class SimDataHelper:
         return tau  
     
 def main():
-    simdatahelper = SimDataHelper()
-    wicket_factors = np.ones((20, 10, 8))
-    over_factors = np.ones((20,10,8))
-    taus = simdatahelper._calculate_taus_semi_compressed(wicket_factors, over_factors)
-    print("taus", taus[:, :, 3])
-    #one_tau = simdatahelper._calculate_one_tau_compressed(1, 6, over_factors, wicket_factors)
+    helper = SimDataHelper()
+    over_transition_factors = np.ones((20, 10, 8))
+    wicket_transition_factors = np.ones((20, 10, 8))
+    for i in range(20):
+        over_transition_factors[i][0][0] = 0
+        wicket_transition_factors[i][0][0] = 0
+    result = helper._calculate_taus_semi_compressed(over_transition_factors, wicket_transition_factors)
+    print(result[:, :, 0])
+    #one_tau = simdatahelper._calculate_one_tau_compressed(3, 8, over_transition_factors, wicket_transition_factors)
     #print("one tau", one_tau)
 
 """def main():
