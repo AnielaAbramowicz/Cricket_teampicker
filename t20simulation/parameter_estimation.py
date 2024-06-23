@@ -16,6 +16,36 @@ class parameterSampler():
         self.a_j = None
         self.num_iterations = num_iterations
         self.burn_in = burn_in
+        self.p_i70j = None
+
+    def get_probability(self, batter : int, over : int, wickets : int, outcome : int) -> float:
+        """
+        This function returns the probability of a certain outcome for a certain batter, over, wickets combination.
+
+        Args:
+            batter (int): The batter index.
+            over (int): The over index.
+            wickets (int): The wickets index.
+            outcome (int): The outcome index.
+        Returns:
+            float: The probability of the outcome.
+        """
+        return self.taus[over, wickets, outcome] * self.p_i70j[batter, outcome] / np.sum(self.taus[over, wickets] * self.p_i70j[batter])
+
+    def sample_parameters(self) -> np.ndarray:
+        """
+        This function samples the parameters by calling metropolis_within_gibbs for each batter.
+        Returns:
+            np.ndarray: the p_i70j matrix containing the probabilities of each outcome for each batter at baseline
+        """
+        if self.p_i70j != None:
+            return self.p_i70j
+        result = np.zeros((self.outcomes.shape[0], self.outcomes.shape[3]))
+        for batter in range(self.outcomes.shape[0]):
+            result[batter, :] =  self.metropolis_within_gibbs(batter)
+        self.p_i70j = result
+        return result
+            
 
     def metropolis_within_gibbs(self, batter : int) -> float:
         """
@@ -56,7 +86,6 @@ class parameterSampler():
                 samples.append(p_current)
         
         return np.mean(samples, axis=0)
-                
 
     def calculate_a_j(self) -> np.ndarray:
         """
