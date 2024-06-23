@@ -383,6 +383,9 @@ def main():
 
             p[np.isnan(p)] = 0
 
+            if np.sum(p) == 0:
+                p = baselines
+
             # Get the outcome
             try:
                 outcome = np.random.choice(8, p=p)
