@@ -3,13 +3,13 @@ import numpy as np
 import os
 import pickle
 
-import t20simulation.data_helper as data_helper
+from data_helper import SimDataHelper
 
 
-class parameterSampler():
+class ParameterSampler():
 
     def __init__(self, c : int, num_iterations : int, burn_in : int):
-        self.helper = data_helper.SimDataHelper()
+        self.helper = SimDataHelper()
         self.taus = None
         self.outcomes = None
         self.c = c
@@ -18,19 +18,26 @@ class parameterSampler():
         self.burn_in = burn_in
         self.p_i70j = None
 
-    def get_probability(self, batter : int, over : int, wickets : int, outcome : int) -> float:
+    def initialize(self):
+        self.p_i70j = self.sample_parameters()
+
+    def get_probability(self, batter : int, over : int, wickets : int) -> float:
         """
-        This function returns the probability of a certain outcome for a certain batter, over, wickets combination.
+        This function returns the probabilities associated with batting outcomes for a certain batter at a game stage,
+        which is the current over of play and the number of wickets that have fallen.
 
         Args:
             batter (int): The batter index.
             over (int): The over index.
             wickets (int): The wickets index.
-            outcome (int): The outcome index.
         Returns:
             float: The probability of the outcome.
         """
-        return self.taus[over, wickets, outcome] * self.p_i70j[batter, outcome] / np.sum(self.taus[over, wickets] * self.p_i70j[batter])
+
+        if self.p_i70j == None:
+            self.p_i70j = self.sample_parameters()
+
+        return self.taus[over, wickets, :] * self.p_i70j[batter, :] / np.sum(self.taus[over, wickets] * self.p_i70j[batter])
 
     def sample_parameters(self) -> np.ndarray:
         """
@@ -38,12 +45,12 @@ class parameterSampler():
         Returns:
             np.ndarray: the p_i70j matrix containing the probabilities of each outcome for each batter at baseline
         """
-        if self.p_i70j != None:
-            return self.p_i70j
+
         result = np.zeros((self.outcomes.shape[0], self.outcomes.shape[3]))
+
         for batter in range(self.outcomes.shape[0]):
             result[batter, :] =  self.metropolis_within_gibbs(batter)
-        self.p_i70j = result
+
         return result
             
 

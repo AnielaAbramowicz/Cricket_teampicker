@@ -5,8 +5,10 @@ import pandas as pd
 import numpy as np
 import os
 import pickle
-from scipy.ndimage import gaussian_filter
 import sys
+
+from scipy.ndimage import gaussian_filter
+from parameter_estimation import ParameterSampler
 
 path = os.path.dirname(os.path.abspath(__file__))
 
@@ -51,6 +53,29 @@ class SimDataHelper:
         self.taus = self.__calculate_taus_semi_compressed()
 
         self.is_initialized = True
+
+        self.p_sampler = ParameterSampler()
+        print("Sampling parameters...")
+        self.p_sampler.initialize()
+
+
+    def get_batting_probabilities(self, batter, over, wicket):
+        """
+        This function returns the probabilities associated with batting outcomes for a certain batter at a game stage,
+        which is the current over of play and the number of wickets that have fallen.
+
+        Args:
+            batter (int): The batter index.
+            over (int): The over index.
+            wickets (int): The wickets index.
+        Returns:
+            float: The probability of the outcome.
+        """
+
+        assert self.is_initialized, 'Data helper has not been initialized.'
+
+        return self.p_sampler.get_probability(batter, over, wicket)
+
 
     def get_outcomes_for_batter(self, batter : int) -> np.ndarray:
         """
