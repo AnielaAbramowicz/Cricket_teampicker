@@ -17,16 +17,46 @@ class parameterSampler():
         self.num_iterations = num_iterations
         self.burn_in = burn_in
 
-    def metropolis_within_gibbs(self) -> np.ndarray:
+    def metropolis_within_gibbs(self, batter : int) -> float:
         """
         This function samples the parameters using the Metropolis within Gibbs algorithm for one batter.
         
+        Args:
+            batter (int): The batter index.
         Returns:
-            np.ndarray: The sampled parameters.
+            np.ndarray: The mean of all sampled p's at every iteration.
         """
+        samples = []
+        p_initial = self.a_j / np.sum(self.a_j)
+        p_current = p_initial.copy()
         for i in range(self.num_iterations):
             for j in range(self.outcomes.shape[3]):
+                #get the current value of p_j that we are sampling with gibbs
+                #in this loop we sample the current outcome while we fix the other values of p
 
+                #calculate the proposed value of p_j
+                p_j_proposed = rng.dirichlet(self.calc_exponent(batter, j))
+
+                #calculate the probability of the current and proposed values of p_j given the other values of p
+                p_current_j_replaced = p_current.copy() 
+                p_current_j_replaced[j] = p_j_proposed #replace the value of p_j with the proposed value
+                current_prob = self.joint_probability_one_batter(p_current, batter) #the probablity of the p values being p current
+                proposal_prob = self.joint_probability_one_batter(p_current_j_replaced, batter) #the probability of the p values being p current but the value for p_j being replaced by p_j_proposed
+
+                #calculate the acceptance probability
+                alpha = min(1, proposal_prob / current_prob)
+                # Accept or reject the proposal
+                if np.random.uniform(0, 1) < alpha:
+                    #we accept
+                    p_current = p_current_j_replaced
+                else:
+                    #we reject
+                    pass
+            if i > self.burn_in:
+                samples.append(p_current)
+        
+        return np.mean(samples, axis=0)
+                
 
     def calculate_a_j(self) -> np.ndarray:
         """
@@ -77,21 +107,21 @@ class parameterSampler():
         return upper / lower
     
 
-    def calc_exponent(self, i : int, outcome : int) -> float:
+    def calc_exponent(self, batter : int, outcome : int) -> float:
         """
         Helper function that calculates the exponent of probablities in the joint probability calculation.
         It is separated out to make the code more readable and because it is used also in the proposal distribution.
 
         Args:
             outcome (int): the oucome
-            i (int): The batter index.
+            batter (int): The batter index.
         Returns:
             float: The calculated joint probability.
         """
         exp = 0.0
         for over in range(self.outcomes.shape[1]):
             for wicket in range(self.outcomes.shape[2]):
-                    exp += self.outcomes[i, over, wicket, outcome]
+                    exp += self.outcomes[batter, over, wicket, outcome]
         exp += (self.a_j[outcome] - 1)
         return exp
     
