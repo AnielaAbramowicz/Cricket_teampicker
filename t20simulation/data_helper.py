@@ -27,6 +27,7 @@ class SimDataHelper:
     def __init__(self):
         self.batter_file = pd.read_csv(os.path.join(path, 'batter_runs.csv'))
 
+
     def get_outcomes_for_batter(self, batter : int) -> np.ndarray:
         """
         Get the outcomes of a batter
@@ -55,6 +56,20 @@ class SimDataHelper:
             self.taus = self.__calculate_taus_semi_compressed()
 
         return self.taus
+    
+    def get_miow(self, batter : int, over : int, wicket : int) -> np.ndarray:
+        """
+        Get the miow, multiplicative parameters used to scale outcome probabilities to different game stages.
+        this is the number of balls batter i has faced at game stage (over, wickets)
+
+        Parameters:
+        batter (int): ID of the batter (>= 1)
+        overs (int): The number of the over (1-20)
+        wickets (int): Number of wickets fallen
+        Returns:
+        the number of balls batter i has faced at game stage (over, wickets)
+        """
+        return np.sum(self.__get_batter_outcomes_at_gamestage(batter, over, wicket))
 
     def __create_batter_outcome_matrix(self, normalize=False, ignore_cache=False) -> np.ndarray:
         """
@@ -99,7 +114,7 @@ class SimDataHelper:
 
         Parameters:
         batter (int): ID of the batter
-        overs (float): The number of the over (1-20)
+        overs (int): The number of the over (1-20)
         wickets (int): Number of wickets fallen
         normalize (bool): Whether to normalize the outcome frequencies so that they can be used as probabilities
 

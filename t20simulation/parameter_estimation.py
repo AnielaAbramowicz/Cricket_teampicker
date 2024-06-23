@@ -3,4 +3,102 @@ import numpy as np
 import os
 import pickle
 
+import t20simulation.data_helper as data_helper
 
+
+class parameterSampler():
+
+    def __init__(self, c : int, num_iterations : int, burn_in : int):
+        self.helper = data_helper.SimDataHelper()
+        self.taus = None
+        self.outcomes = None
+        self.c = c
+        self.a_j = None
+        self.num_iterations = num_iterations
+        self.burn_in = burn_in
+
+    def metropolis_within_gibbs(self) -> np.ndarray:
+        """
+        This function samples the parameters using the Metropolis within Gibbs algorithm for one batter.
+        
+        Returns:
+            np.ndarray: The sampled parameters.
+        """
+        for i in range(self.num_iterations):
+            for j in range(self.outcomes.shape[3]):
+
+
+    def calculate_a_j(self) -> np.ndarray:
+        """
+        Calculates the value of a_j using the outcomes and taus arrays.
+
+        Returns:
+            np.ndarray: The calculated value of a_j.
+        """
+        if self.a_j != None:
+            return self.a_j
+        upper = np.zeros(self.outcomes.shape[3])
+        lower = 0.0
+        for batter in range(self.outcomes.shape[0]):
+            for over in range(self.outcomes.shape[1]):
+                for wickets in range(self.outcomes.shape[2]):
+                    for outcome in range(self.outcomes.shape[3]):
+                        lower += self.outcomes[batter, over, wickets, outcome] / self.taus[over, wickets, outcome]
+                    upper += self.outcomes[batter, over, wickets] / self.taus[over, wickets]
+        a_j = self.c * upper / lower
+        self.a_j = a_j
+        return a_j
+    
+    def joint_probability_one_batter(self, p : np.ndarray, batter : int) -> float:
+        """
+        Calculates the joint probability of the probility of outcomes for a single batter.
+
+        Args:
+            p (np.ndarray): The probability of each outcome for this batter i.
+            batter (int): The batter index.
+        Returns:
+            float: The calculated joint probability.
+        """
+        upper = 1.0
+        for j in range(p.shape[0]):
+            upper *= p[j] ** (self.calc_exponent(j, p[j]))
+
+        lower = 1.0
+        # a big problem here is we have to know the sum over j of p_i_7_o_j even though we only know p_i_7_0_j
+        # this is equal to the probability of the batter i getting result j on the 7th over for o wickets being down
+        # we can try to obtain this directly from the data, but it is not clear how to do this
+        # i continue as if it is a typo and should be p_i_7_0_j
+        summed_taus = np.sum(self.taus.sum, axis=2)
+        p_factor = np.sum(p)
+        summed_taus *= p_factor
+        for over in range(self.outcomes.shape[1]):
+            for wicket in range(self.outcomes.shape[2]):
+                lower *= summed_taus[over, wicket]**self.helper.get_miow(batter,over, wicket)
+        return upper / lower
+    
+
+    def calc_exponent(self, i : int, outcome : int) -> float:
+        """
+        Helper function that calculates the exponent of probablities in the joint probability calculation.
+        It is separated out to make the code more readable and because it is used also in the proposal distribution.
+
+        Args:
+            outcome (int): the oucome
+            i (int): The batter index.
+        Returns:
+            float: The calculated joint probability.
+        """
+        exp = 0.0
+        for over in range(self.outcomes.shape[1]):
+            for wicket in range(self.outcomes.shape[2]):
+                    exp += self.outcomes[i, over, wicket, outcome]
+        exp += (self.a_j[outcome] - 1)
+        return exp
+    
+
+
+
+
+
+    
+    
