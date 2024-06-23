@@ -132,7 +132,7 @@ class parameterSampler():
         summed_taus *= p_factor
         for over in range(self.outcomes.shape[1]):
             for wicket in range(self.outcomes.shape[2]):
-                lower *= summed_taus[over, wicket]**self.helper.get_miow(batter,over, wicket)
+                lower *= summed_taus[over, wicket]**self.helper.get_total_outcomes(batter,over, wicket)
         return upper / lower
     
 

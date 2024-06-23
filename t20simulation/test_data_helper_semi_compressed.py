@@ -12,14 +12,14 @@ class TestCalculateSemiCompressedTaus(unittest.TestCase):
         wicket_transition_factors = np.ones((20, 10, 8))
         overs_transition_factors = np.ones((20, 10, 8))
         helper = SimDataHelper()
-        compressed_taus = helper._calculate_taus_semi_compressed(overs_transition_factors, wicket_transition_factors)
+        compressed_taus = helper.__calculate_taus_semi_compressed(overs_transition_factors, wicket_transition_factors)
         self.assertTrue(np.allclose(compressed_taus, np.ones((20, 10, 8))))
 
     def test_all_zeros_semi(self):
         wicket_transition_factors = np.zeros((20, 10, 8))
         overs_transition_factors = np.zeros((20, 10, 8))
         helper = SimDataHelper()
-        compressed_taus = helper._calculate_taus_semi_compressed(overs_transition_factors, wicket_transition_factors)
+        compressed_taus = helper.__calculate_taus_semi_compressed(overs_transition_factors, wicket_transition_factors)
         expected = np.zeros((20, 10, 8))
         expected[6, 0, :] = 1
         self.assertTrue(np.allclose(compressed_taus, expected))
@@ -32,14 +32,14 @@ class TestCalculateSemiCompressedTaus(unittest.TestCase):
             for j in range(10):
                 for k in range(8):
                     over_transition_factors[i][j][k] = 2
-        taus = helper._calculate_taus_semi_compressed(wicket_transition_factors, over_transition_factors)
+        taus = helper.__calculate_taus_semi_compressed(wicket_transition_factors, over_transition_factors)
         self.assertEqual(taus[8, 3, 0], 8.0)
 
     def test_random_data_semi(self):
         np.random.seed(42)
         wicket_transition_factors = np.random.rand(20, 10, 8)
         overs_transition_factors = np.random.rand(20, 10, 8)
-        compressed_taus = self.helper._calculate_taus_semi_compressed(overs_transition_factors, wicket_transition_factors)
+        compressed_taus = self.helper.__calculate_taus_semi_compressed(overs_transition_factors, wicket_transition_factors)
         self.assertEqual(compressed_taus.shape, (20, 10, 8))
         self.assertFalse(np.isnan(compressed_taus).any())
 
@@ -48,7 +48,7 @@ class TestCalculateSemiCompressedTaus(unittest.TestCase):
         wicket_transition_factors = np.ones((20, 10, 8))
         over_transition_factors[2, 2, 0] = 2
         wicket_transition_factors[2, 2, 0] = 2
-        result = self.helper._calculate_taus_semi_compressed(over_transition_factors, wicket_transition_factors)
+        result = self.helper.__calculate_taus_semi_compressed(over_transition_factors, wicket_transition_factors)
         expected_0_3 = 0.875
         actual = result[0][3][0]
         self.assertAlmostEqual(actual, expected_0_3, places=5)
@@ -58,7 +58,7 @@ class TestCalculateSemiCompressedTaus(unittest.TestCase):
         wicket_transition_factors = np.ones((20, 10, 8))
         for i in range(20):
             over_transition_factors[i][0][0] = 0
-        result = self.helper._calculate_taus_semi_compressed(over_transition_factors, wicket_transition_factors)
+        result = self.helper.__calculate_taus_semi_compressed(over_transition_factors, wicket_transition_factors)
         self.assertEqual(result[7][0][0], 0.0)
         self.assertEqual(result[7][1][0], 0.0)
         self.assertEqual(result[7][5][0], 0.8)
@@ -75,7 +75,7 @@ class TestCalculateSemiCompressedTaus(unittest.TestCase):
         for i in range(20):
             over_transition_factors[i][0][0] = 0
             wicket_transition_factors[i][0][0] = 0
-        result = self.helper._calculate_taus_semi_compressed(over_transition_factors, wicket_transition_factors)
+        result = self.helper.__calculate_taus_semi_compressed(over_transition_factors, wicket_transition_factors)
         for i in range(20):
             for j in range(10):
                 if i!=6 and j!=0:
