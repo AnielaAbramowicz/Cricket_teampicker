@@ -65,7 +65,7 @@ class parameterSampler():
                 #in this loop we sample the current outcome while we fix the other values of p
 
                 #calculate the proposed value of p_j
-                p_j_proposed = rng.dirichlet(self.calc_exponent(batter, j))
+                p_j_proposed = np.random.dirichlet(self.calc_exponent(batter, j))
 
                 #calculate the probability of the current and proposed values of p_j given the other values of p
                 p_current_j_replaced = p_current.copy() 

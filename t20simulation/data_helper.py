@@ -365,8 +365,6 @@ class SimDataHelper:
         tau = np.multiply(over_factor, wicket_factor, out=np.zeros(8), where=(over_factor != np.inf) & (wicket_factor != np.inf) & (over_factor != 0) & (wicket_factor != 0))
         return tau
 
-
-
 def main():
     # Just for testing
     simdatahelper = SimDataHelper()
