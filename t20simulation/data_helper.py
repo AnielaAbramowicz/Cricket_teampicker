@@ -41,6 +41,7 @@ class SimDataHelper:
     def initialize(self):
         """
         Loads and precalculates data into memory for quick access.
+        Call this before using any other functions.
         """
 
         # Calculate batter outcome matrix
@@ -313,17 +314,23 @@ class SimDataHelper:
 
         # Normalize the outcome matrix
         sums = np.sum(outcome_matrix, axis=2)
-        # Divide the elements in the second axis by the sums
+        # Divide the elements in the second axis by the sums,
+        # so that we have proportions of outcomes instead of total occurances
         for i in range(0, 20):
             for j in range(0, 10):
                 outcome_matrix[i, j, :] = np.divide(outcome_matrix[i, j, :], sums[i, j], out=np.zeros_like(outcome_matrix[i, j, :]), where=sums[i, j] != 0)
-
 
         # Calculate the transition factors for each over
         for over in range(1, 20):
             factors = np.divide(outcome_matrix[over, :, :], outcome_matrix[over-1, :, :], out=np.full_like(outcome_matrix[over, :, :], np.nan), where=outcome_matrix[over-1, :, :] != 0)
 
             over_transition_factors[over-1, :, :] = factors
+
+        # Since some game stages have never been reached in the data, we get nans when
+        # we try to calculate the transition factors, which are replaced by zeros a few lines above.
+        # I am just going to replace these zeros with ones, so that when calculating the taus,
+        # the taus in these positions should get their values from neighbouring game stages.
+        over_transition_factors[over_transition_factors==0] = 1
 
         # Smooth the transition factors
         #over_transition_factors = self.__smooth_transition_factors(over_transition_factors)
@@ -432,7 +439,8 @@ class SimDataHelper:
         for over in range(0, 20):
             for wicket in range(0, 10):
                 taus[over, wicket, :] = self.__calculate_one_tau_compressed(wicket, over, over_transition_factors, wicket_transition_factors)
-        taus[np.isnan(taus)] = 0 
+
+        taus[np.isnan(taus)] = 0
 
         return taus
 
@@ -482,7 +490,8 @@ class SimDataHelper:
         for i in range(wicket):
             wicket_factor = np.multiply(wicket_factor, compressed_wicket_factors[i])
 
-        tau = np.multiply(over_factor, wicket_factor, out=np.zeros_like(over_factor), where=(over_factor != np.inf) & (wicket_factor != np.inf) & (over_factor != 0) & (wicket_factor != 0))
+
+        tau = np.multiply(over_factor, wicket_factor, out=np.ones_like(over_factor), where=(over_factor != np.inf) & (wicket_factor != np.inf) & (over_factor != 0) & (wicket_factor != 0))
 
 
 
