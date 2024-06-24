@@ -1,6 +1,7 @@
 import math
 import pandas as pd
 import numpy as np
+import time
 import os
 import pickle
 
@@ -18,6 +19,7 @@ class ParameterSampler():
     def initialize(self):
         self.a_j = self.calculate_a_j()
         self.p_i70j = self.sample_parameters()
+        #self.p_i70j = self.sample_parameters_simple()
 
     def get_probability(self, batter : int, over : int, wickets : int) -> float:
         """
@@ -40,6 +42,13 @@ class ParameterSampler():
 
         return self.taus[over, wickets, :] * self.p_i70j[batter, :] / np.sum(self.taus[over, wickets] * self.p_i70j[batter])
 
+    def sample_parameters_simple(self):
+        result = np.zeros((self.outcomes.shape[0], self.outcomes.shape[3]))
+        for batter in range(self.outcomes.shape[0]):
+            result[batter, :] = self.calc_exponents(batter) / np.sum(self.calc_exponents(batter))
+
+        return result
+
     def sample_parameters(self) -> np.ndarray:
         """
         This function samples the parameters by calling metropolis_within_gibbs for each batter.
@@ -49,9 +58,29 @@ class ParameterSampler():
 
         result = np.zeros((self.outcomes.shape[0], self.outcomes.shape[3]))
 
-        for batter in range(self.outcomes.shape[0]):
-            #result[batter, :] =  self.metropolis_within_gibbs(batter)
-            result[batter, :] = self.simple_baselines(batter)
+        # output file
+        output_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "baselines.csv")
+
+        # Read from csv if it exists
+        file_exists = os.path.exists(output_file)
+        num_batters_sampled = 0
+        if file_exists:
+            print("Reading from file")
+            output = pd.read_csv(output_file, index_col=0)
+            num_batters_sampled = output.index.max()
+        else:
+            # Create dataframe
+            output = pd.DataFrame(columns=['0', '1', '2', '3', '4', '5', '6', '7'])
+
+        # Get the number of batters that have already been sampled
+
+        for batter in range(num_batters_sampled+1, self.outcomes.shape[0]):
+            starttime = time.time()
+            result[batter, :] =  self.metropolis_within_gibbs(batter)
+            print("Batter", batter, "took", time.time() - starttime, "seconds")
+            print("Result", result[batter, :])
+            output.loc[batter] = result[batter, :]
+            output.to_csv(output_file)
 
         return result
 
@@ -70,13 +99,20 @@ class ParameterSampler():
         samples = []
         p_initial = self.a_j / np.sum(self.a_j)
         p_current = p_initial.copy()
+
+        exponents = self.calc_exponents(batter)
+
         for i in range(self.num_iterations):
+            p_proposed = np.random.dirichlet(exponents)
             for j in range(self.outcomes.shape[3]):
                 #get the current value of p_j that we are sampling with gibbs
                 #in this loop we sample the current outcome while we fix the other values of p
 
                 #calculate the proposed value of p_j
-                p_j_proposed = np.random.dirichlet(self.calc_exponents(batter))[j]
+                p_j_proposed = p_proposed[j]
+
+                if p_j_proposed <= 0:
+                    continue
 
                 #calculate the probability of the current and proposed values of p_j given the other values of p
                 p_current_j_replaced = p_current.copy() 
@@ -86,7 +122,6 @@ class ParameterSampler():
                 #current_prob = self.joint_probability_one_batter(p_current, batter) #the probablity of the p values being p current
                 #proposal_prob = self.joint_probability_one_batter(p_current_j_replaced, batter) #the probability of the p values being p current but the value for p_j being replaced by p_j_proposed
 
-                exponent = self.calc_exponent(batter, j)
                 denominator_new = self.calc_denominator_joint_probability(p_current_j_replaced, batter)
                 denominator_old = self.calc_denominator_joint_probability(p_current, batter)
             
@@ -99,6 +134,7 @@ class ParameterSampler():
                 #alpha = min(1, np.divide(proposal_prob, current_prob, out=np.zeros_like(proposal_prob), where=current_prob!=0))
 
                 #we ac
+                exponent = exponents[j]
                 if exponent > needed_exponent and p_current[j] > p_j_proposed:
                     alpha = 1
                 elif exponent < needed_exponent and p_current[j] < p_j_proposed:
@@ -190,6 +226,14 @@ class ParameterSampler():
         if self.a_j != None:
             return self.a_j
 
+        # Check if pickled
+        a_j_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "a_j.pkl")
+        if os.path.exists(a_j_file):
+            with open(a_j_file, 'rb') as f:
+                a_j = pickle.load(f)
+                self.a_j = a_j
+                return a_j
+
         numerator = np.zeros(self.outcomes.shape[3])
         denominator = 0.0
 
@@ -201,6 +245,11 @@ class ParameterSampler():
                     numerator += self.outcomes[batter, over, wickets] / self.taus[over, wickets]
         a_j = self.c * numerator / denominator
         self.a_j = a_j
+
+        # Pickle the result
+        with open(a_j_file, 'wb') as f:
+            pickle.dump(a_j, f)
+
         return a_j
 
     
