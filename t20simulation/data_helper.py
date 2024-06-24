@@ -57,7 +57,7 @@ class SimDataHelper:
         self.taus = self.__calculate_taus_semi_compressed()
         self.taus_is_initialized = True
 
-        self.p_sampler = ParameterSampler(70, 1000, 500, self.batter_outcomes_matrix, self.taus)
+        self.p_sampler = ParameterSampler(60, 1000, 500, self.batter_outcomes_matrix, self.taus)
         print("Sampling parameters...")
         self.p_sampler.initialize()
         self.baselines_is_initialized = True
@@ -253,7 +253,7 @@ class SimDataHelper:
 
         return smoothed
 
-    def __get_wicket_transition_factors(self, recalculate=True):
+    def __get_wicket_transition_factors(self, recalculate=False):
 
         # Check if pickled
         if not recalculate and os.path.exists(os.path.join(path, 'pickle_jar/wicket_transition_factors.pkl')):
@@ -294,7 +294,7 @@ class SimDataHelper:
         return wicket_transition_factors
 
 
-    def __get_over_transition_factors(self, recalculate=True):
+    def __get_over_transition_factors(self, recalculate=False):
 
         # Check if pickled
         if not recalculate and os.path.exists(os.path.join(path, 'pickle_jar/over_transition_factors.pkl')):

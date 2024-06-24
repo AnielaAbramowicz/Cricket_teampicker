@@ -77,7 +77,11 @@ class ParameterSampler():
                 proposal_prob = self.joint_probability_one_batter(p_current_j_replaced, batter) #the probability of the p values being p current but the value for p_j being replaced by p_j_proposed
 
                 #calculate the acceptance probability
-                alpha = min(1, proposal_prob / current_prob)
+                alpha = min(1, np.divide(proposal_prob, current_prob, out=np.zeros_like(proposal_prob), where=current_prob!=0))
+
+                if alpha != 0:
+                    print(alpha)
+
                 # Accept or reject the proposal
                 if np.random.uniform(0, 1) < alpha:
                     #we accept
@@ -97,19 +101,40 @@ class ParameterSampler():
         """
         if self.a_j != None:
             return self.a_j
-        upper = np.zeros(self.outcomes.shape[3])
-        lower = 0.0
+
+        numerator = np.zeros(self.outcomes.shape[3])
+        denominator = 0.0
+
         for batter in range(self.outcomes.shape[0]):
             for over in range(self.outcomes.shape[1]):
                 for wickets in range(self.outcomes.shape[2]):
                     for outcome in range(self.outcomes.shape[3]):
-                        lower += self.outcomes[batter, over, wickets, outcome] / self.taus[over, wickets, outcome]
-                    upper += self.outcomes[batter, over, wickets] / self.taus[over, wickets]
-        a_j = self.c * upper / lower
+                        denominator += self.outcomes[batter, over, wickets, outcome] / self.taus[over, wickets, outcome]
+                    numerator += self.outcomes[batter, over, wickets] / self.taus[over, wickets]
+        a_j = self.c * numerator / denominator
         self.a_j = a_j
         return a_j
-    
+
     def joint_probability_one_batter(self, p : np.ndarray, batter : int) -> float:
+        """
+        Calculates the joint probability of the probility of outcomes for a single batter.
+
+        Args:
+            p (np.ndarray): The probability of each outcome for this batter i.
+            batter (int): The batter index.
+        Returns:
+            float: The calculated joint probability.
+        """
+
+        numerator = np.prod((p) ** self.calc_exponents(batter))
+        denominator = np.prod([np.sum(self.taus[o, w,  :] * p) ** np.sum(self.outcomes[batter, o, w, :]) for o in range(self.outcomes.shape[1]) for w in range(self.outcomes.shape[2])])
+
+        if numerator == 0:
+            print("Numerator is 0")
+
+        return numerator / denominator
+    
+    def joint_probability_one_batter_old(self, p : np.ndarray, batter : int) -> float:
         """
         Calculates the joint probability of the probility of outcomes for a single batter.
 
@@ -128,7 +153,7 @@ class ParameterSampler():
         # this is equal to the probability of the batter i getting result j on the 7th over for o wickets being down
         # we can try to obtain this directly from the data, but it is not clear how to do this
         # i continue as if it is a typo and should be p_i_7_0_j
-        summed_taus = np.sum(self.taus.sum, axis=2)
+        summed_taus = np.sum(self.taus, axis=2)
         p_factor = np.sum(p)
         summed_taus *= p_factor
         for over in range(self.outcomes.shape[1]):
@@ -155,7 +180,7 @@ class ParameterSampler():
         exp += (self.a_j[outcome] - 1)
         return exp
 
-    def calc_exponents(self, batter : int) -> np.array:
+    def calc_exponents(self, batter : int, with_alpha=True) -> np.array:
         """
         Helper function that calculates the exponent of probablities in the joint probability calculation.
 
@@ -168,7 +193,13 @@ class ParameterSampler():
         for over in range(self.outcomes.shape[1]):
             for wicket in range(self.outcomes.shape[2]):
                 exp += self.outcomes[batter, over, wicket, :]
-        exp += (self.a_j - 1)
+
+        if with_alpha:
+            exp += (self.a_j - 1)
+
+        if np.any(exp < 0):
+            print("Negative exponent")
+
         return exp
     
 
