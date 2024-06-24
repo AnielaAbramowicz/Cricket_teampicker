@@ -36,7 +36,9 @@ class SimDataHelper:
 
     def __init__(self):
         self.batter_file = pd.read_csv(os.path.join(path, 'batter_runs.csv'))
+        self.bowler_file = pd.read_csv(os.path.join(path, 'bowler_runs.csv'))
         self.num_batters = len(self.batter_file['batter id'].unique())
+        self.num_bowlers = len(self.bowler_file['bowler id'].unique())
 
     def initialize(self):
         """
@@ -46,6 +48,9 @@ class SimDataHelper:
 
         # Calculate batter outcome matrix
         self.batter_outcomes_matrix = self.__create_batter_outcome_matrix()
+
+        # Calculate bowler outcome matrix
+        self.bowler_outcome_matrix = self.__create_bowler_outcome_matrix()
         self.outcomes_is_initialized = True
 
         # The total number of outcomes for each batter
@@ -98,6 +103,21 @@ class SimDataHelper:
 
         return self.batter_outcomes_matrix[batter - 1]
 
+    def get_outcomes_for_bowler(self, bowler : int) -> np.ndarray:
+        """
+        Get the outcomes of a bowler
+
+        Parameters:
+        bowler (int): ID of the bowler (>= 1)
+
+        Returns:
+        pd.DataFrame: A DataFrame containing the outcomes of the bowler
+        """
+
+        assert self.outcomes_is_initialized, 'Batting outcome matrix has not been initialized.'
+
+        return self.bowler_outcome_matrix[bowler - 1]
+
     def get_taus(self) -> np.ndarray:
         """
         Get the taus, multiplicative parameters used to scale outcome probabilities to different game stages.
@@ -126,6 +146,52 @@ class SimDataHelper:
         assert self.is_initialized, 'Data has not been initialized.'
 
         return self.batting_outcome_totals[batter, over, wicket]
+
+    def __create_bowler_outcome_matrix(self, normalize=False, ignore_cache=False) -> np.ndarray:
+        """
+        Create a matrix containing the outcome frequencies of each bowler at each game stage
+        
+        Parameters:
+        normalize (bool): Whether to normalize the outcome frequencies so that they can be used as probabilities
+        
+        Returns:
+        np.ndarray: A matrix containing the outcome frequencies of each bowler at each game stage
+        """
+
+        if not ignore_cache and os.path.exists(os.path.join(path, 'pickle_jar/bowler_outcome_matrix.pkl')):
+            with open(os.path.join(path, 'pickle_jar/bowler_outcome_matrix.pkl'), 'rb') as f:
+                return pickle.load(f)
+            
+        bowler_outcome_matrix = np.zeros((self.bowler_file['bowler id'].max(), 20, 10, 8))
+
+        outcomes = self.bowler_file[self.bowler_file['innings']==1]
+        outcomes = outcomes.drop(columns=['match id', 'bowler', 'date', 'extra runs', 'innings', 'ipl-it20'], errors='ignore')
+        outcomes = outcomes.groupby(['bowler id', 'over', 'wickets'], as_index=False).sum()
+
+        # Iterate through each batter
+        for bowler in range(1, self.bowler_file['bowler id'].max()+1):
+            print(f'Processing batter {bowler} out of {self.bowler_file["bowler id"].max()}...')
+            # Iterate through each game stage
+            for overs in range(1, 21):
+                for wickets in range(0, 10):
+                    # Get the outcome frequencies of the batter at the game stage
+                    bowler_outcomes = outcomes[(outcomes['bowler id'] == bowler) & (outcomes['over'] == overs) & (outcomes['wickets'] == wickets)]
+
+                    if len(bowler_outcomes) == 0:
+                        bowler_outcome_matrix[bowler - 1, overs - 1, wickets, :] = [0] * 8
+                        continue
+
+                    # Convert to numpy array
+                    results = bowler_outcomes[['0', '1', '2', '3', '4', '5', '6', 'wicket']].to_numpy(dtype=int)[0]
+
+                    # Store the outcome frequencies in the matrix
+                    bowler_outcome_matrix[bowler - 1, overs - 1, wickets, :] = results
+
+        # pickle the matrix
+        with open(os.path.join(path, 'pickle_jar/bowler_outcome_matrix.pkl'), 'wb') as f:
+            pickle.dump(bowler_outcome_matrix, f)
+
+        return bowler_outcome_matrix
 
     def __create_batter_outcome_matrix(self, normalize=False, ignore_cache=False) -> np.ndarray:
         """
@@ -499,73 +565,7 @@ class SimDataHelper:
     
 
 def main():
-    # Just for testing
-    simdatahelper = SimDataHelper()
-    #simdatahelper.get_wicket_transition_factors()
-    #over_transition_factors = simdatahelper.get_over_transition_factors()
-
-    wicket_transition_factors = np.ones((20, 10, 8))
-    overs_transition_factors = np.ones((20, 10, 8))
-    compressed_taus = simdatahelper._calculate_taus_semi_compressed(overs_transition_factors, wicket_transition_factors)
-    print(compressed_taus)
-
-    taus = simdatahelper.get_taus()
-
-    baselines = simdatahelper.prior_outcomes_paper
-
-    n_games = 5000
-    total_runs = np.zeros(n_games)
-    outcomes = np.zeros((20, 8))
-
-    for i in range(n_games):
-
-        print(f"Simulating game {i+1}...\t", end='\r')
-
-        # Simulate a match
-        ball_number = 0
-        wickets = 0
-        score = 0
-
-        while wickets < 10 and ball_number < 120:
-            over = ball_number // 6 + 1
-
-            # Extra
-            if np.random.rand() < 0.033:
-                score += 1
-                continue
-
-            # Get the probabilities of each outcome
-            p = (baselines * taus[over-1, wickets, :]) / np.sum(baselines * taus[over-1, wickets, :])
-
-            p[np.isnan(p)] = 0
-
-            if np.sum(p) == 0:
-                p = baselines
-
-            # Get the outcome
-            try:
-                outcome = np.random.choice(8, p=p)
-            except ValueError as e:
-                print(e)
-
-            # Check if the outcome is a wicket
-            if outcome == 7:
-                wickets += 1
-            else:
-                score += outcome
-
-            outcomes[over-1, outcome] += 1
-
-            ball_number += 1
-
-        total_runs[i] = score
-
-    print(outcomes)
-
-    print(f"Final score: {score}/{wickets} in {ball_number//6}.{ball_number%6} overs")
-
-    # Save outcomes to a csv file
-    pd.DataFrame(outcomes).to_csv('outcomes_from_sim.csv')
+    pass
 
 if __name__ == '__main__':
     main()
