@@ -52,11 +52,11 @@ class SimDataHelper:
         # The taus
         self.taus = self.__calculate_taus_semi_compressed()
 
-        self.is_initialized = True
-
-        self.p_sampler = ParameterSampler()
+        self.p_sampler = ParameterSampler(70, 1000, 500, self.batter_outcomes_matrix, self.taus)
         print("Sampling parameters...")
         self.p_sampler.initialize()
+
+        self.is_initialized = True
 
 
     def get_batting_probabilities(self, batter, over, wicket):

@@ -118,3 +118,13 @@ class MatchSimulator:
         expected_loss = x*np.sum(batting_probabilities[0:7]) + y*batting_probabilities[7]
         return expected_loss
         
+
+def main():
+    team1 = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+    team2 = np.array([12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22])
+    sim = MatchSimulator(team1, team2)
+    sim.simulate_inning_1(True)
+    print(f"Team 1 score: {sim.team1_runs}/{sim.team1_wickets}")
+
+if __name__ == '__main__':
+    main()

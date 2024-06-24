@@ -3,15 +3,11 @@ import numpy as np
 import os
 import pickle
 
-from data_helper import SimDataHelper
-
-
 class ParameterSampler():
 
-    def __init__(self, c : int, num_iterations : int, burn_in : int):
-        self.helper = SimDataHelper()
-        self.taus = None
-        self.outcomes = None
+    def __init__(self, c : int, num_iterations : int, burn_in : int, outcomes : np.ndarray, taus : np.ndarray):
+        self.taus = taus
+        self.outcomes = outcomes
         self.c = c
         self.a_j = None
         self.num_iterations = num_iterations
@@ -139,7 +135,7 @@ class ParameterSampler():
         summed_taus *= p_factor
         for over in range(self.outcomes.shape[1]):
             for wicket in range(self.outcomes.shape[2]):
-                lower *= summed_taus[over, wicket]**self.helper.get_total_outcomes(batter,over, wicket)
+                lower *= summed_taus[over, wicket]**self.outcomes[batter,over, wicket]
         return upper / lower
     
 
