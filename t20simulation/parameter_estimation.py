@@ -1,3 +1,4 @@
+import math
 import pandas as pd
 import numpy as np
 import os
@@ -80,14 +81,31 @@ class ParameterSampler():
                 #calculate the probability of the current and proposed values of p_j given the other values of p
                 p_current_j_replaced = p_current.copy() 
                 p_current_j_replaced[j] = p_j_proposed #replace the value of p_j with the proposed value
-                current_prob = self.joint_probability_one_batter(p_current, batter) #the probablity of the p values being p current
-                proposal_prob = self.joint_probability_one_batter(p_current_j_replaced, batter) #the probability of the p values being p current but the value for p_j being replaced by p_j_proposed
+
+                #the code section below was numerically impossible to compute so we use a different approach
+                #current_prob = self.joint_probability_one_batter(p_current, batter) #the probablity of the p values being p current
+                #proposal_prob = self.joint_probability_one_batter(p_current_j_replaced, batter) #the probability of the p values being p current but the value for p_j being replaced by p_j_proposed
+
+                exponent = self.calc_exponent(batter, j)
+                denominator_new = self.calc_denominator_joint_probability(p_current_j_replaced, batter)
+                denominator_old = self.calc_denominator_joint_probability(p_current, batter)
+            
+                needed_exponent = self.calculate_x(p_current[j], p_j_proposed, denominator_old, denominator_new)
+                if needed_exponent < 0:
+                    #reject the proposal
+                    continue
 
                 #calculate the acceptance probability
-                alpha = min(1, np.divide(proposal_prob, current_prob, out=np.zeros_like(proposal_prob), where=current_prob!=0))
+                #alpha = min(1, np.divide(proposal_prob, current_prob, out=np.zeros_like(proposal_prob), where=current_prob!=0))
 
-                if alpha != 0:
-                    print(alpha)
+                #we ac
+                if exponent > needed_exponent and p_current[j] > p_j_proposed:
+                    alpha = 1
+                elif exponent < needed_exponent and p_current[j] < p_j_proposed:
+                    alpha = 1
+                else:
+                    alpha = ((p_j_proposed**exponent)/denominator_new)/((p_current[j]**exponent)/denominator_old)
+
 
                 # Accept or reject the proposal
                 if np.random.uniform(0, 1) < alpha:
@@ -98,6 +116,69 @@ class ParameterSampler():
                 samples.append(p_current)
         
         return np.mean(samples, axis=0)
+
+    def calculate_x(self, p1, p2, a, b):
+        """
+        Calculate the value of x for the equation (p1^x) / a = (p2^x) / b.
+
+        Parameters:
+        p1 (float): Base of the exponent on the left side.
+        p2 (float): Base of the exponent on the right side.
+        a (float): Coefficient on the left side.
+        b (float): Coefficient on the right side.
+
+        Returns:
+        float: The value of x.
+        """
+        # Calculate the natural logarithms of p1 and p2
+        log_p1 = math.log(p1)
+        log_p2 = math.log(p2)
+        
+        # Calculate the ratio b/a
+        ratio = b / a
+        
+        # Calculate the natural logarithm of the ratio
+        log_ratio = math.log(ratio)
+        
+        # Calculate x using the formula derived
+        if log_p1 == log_p2:
+            raise ValueError("Logarithms of p1 and p2 are equal, which would result in division by zero.")
+        else:
+            x = log_ratio / (log_p2 - log_p1)
+        
+        return x
+
+    def joint_probability_one_batter(self, p : np.ndarray, batter : int) -> float:
+        """
+        Calculates the joint probability of the probility of outcomes for a single batter.
+
+        Args:
+            p (np.ndarray): The probability of each outcome for this batter i.
+            batter (int): The batter index.
+        Returns:
+            float: The calculated joint probability.
+        """
+
+        numerator = np.prod((p) ** self.calc_exponents(batter))
+        denominator = np.prod([np.sum(self.taus[o, w,  :] * p) ** np.sum(self.outcomes[batter, o, w, :]) for o in range(self.outcomes.shape[1]) for w in range(self.outcomes.shape[2])])
+
+        if numerator == 0:
+            print("Numerator is 0")
+
+        return numerator / denominator
+    
+    def calc_denominator_joint_probability(self, p : np.ndarray, batter : int) -> float:
+        """
+        Calculates the denominator of the joint probability of the probility of outcomes for a single batter.
+
+        Args:
+            p (np.ndarray): The probability of each outcome for this batter i.
+            batter (int): The batter index.
+        Returns:
+            float: The calculated denominator of the joint probability.
+        """
+        denominator = np.prod([np.sum(self.taus[o, w,  :] * p) ** np.sum(self.outcomes[batter, o, w, :]) for o in range(self.outcomes.shape[1]) for w in range(self.outcomes.shape[2])])
+        return denominator
 
     def calculate_a_j(self) -> np.ndarray:
         """
@@ -122,24 +203,6 @@ class ParameterSampler():
         self.a_j = a_j
         return a_j
 
-    def joint_probability_one_batter(self, p : np.ndarray, batter : int) -> float:
-        """
-        Calculates the joint probability of the probility of outcomes for a single batter.
-
-        Args:
-            p (np.ndarray): The probability of each outcome for this batter i.
-            batter (int): The batter index.
-        Returns:
-            float: The calculated joint probability.
-        """
-
-        numerator = np.prod((p) ** self.calc_exponents(batter))
-        denominator = np.prod([np.sum(self.taus[o, w,  :] * p) ** np.sum(self.outcomes[batter, o, w, :]) for o in range(self.outcomes.shape[1]) for w in range(self.outcomes.shape[2])])
-
-        if numerator == 0:
-            print("Numerator is 0")
-
-        return numerator / denominator
     
     def joint_probability_one_batter_old(self, p : np.ndarray, batter : int) -> float:
         """
