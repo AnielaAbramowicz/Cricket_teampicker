@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from parameter_estimation import ParameterSampler
 from data_helper import SimDataHelper
@@ -32,7 +33,10 @@ class MatchSimulator:
         self.team2_runs = 0
         self.team2_wickets = 0
 
+        self.current_batter = None # i think we need to have this aswell
+
         self.helper = SimDataHelper
+        self.duckwort_lewis_table = pd.read_csv('data/duckworth_lewis_table.csv') #replace with actual path 
         print('Initializing...')
         self.helper.initialize()
         print('Done.')
@@ -98,11 +102,19 @@ class MatchSimulator:
         pass
 
     def get_duckworth_lewis_table_value(self, overs : int, wickets : int) -> float:
+        return self.duckwort_lewis_table.iloc[overs, wickets]
 
-        pass
+    def __expected_runs(self, over: int) -> float:
+        batting_probabilities = self.helper.get_batting_probabilities(self.current_batter, over, self.team2_wickets)
+        outcomes = np.arange(1, 7)
+        expected_runs = np.sum(outcomes * batting_probabilities[1:7])
+        return expected_runs
 
-    def __expected_runs(self, over : int) -> float:
-        pass
 
     def __expected_resource_loss(self, over : int) -> float:
-        pass
+        batting_probabilities = self.helper.get_batting_probabilities(self.current_batter, over, self.team2_wickets)
+        x = self.get_duckworth_lewis_table_value(over, self.team2_wickets) - self.get_duckworth_lewis_table_value(over + 1, self.team2_wickets)
+        y = self.get_duckworth_lewis_table_value(over, self.team2_wickets) - self.get_duckworth_lewis_table_value(over, self.team2_wickets + 1)
+        expected_loss = x*np.sum(batting_probabilities[0:7]) + y*batting_probabilities[7]
+        return expected_loss
+        

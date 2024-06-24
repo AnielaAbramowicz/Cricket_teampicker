@@ -464,9 +464,6 @@ class SimDataHelper:
 
         
         compressed_wicket_factors = np.mean(wicket_factors_new, axis=0)
-    
-
-        sys.exit
 
         # Calculate the taus in a similar fashion to compressed taus
         over_factor = np.ones(8)
@@ -486,19 +483,8 @@ class SimDataHelper:
 
         return tau  
     
-def main():
-    helper = SimDataHelper()
-    over_transition_factors = np.ones((20, 10, 8))
-    wicket_transition_factors = np.ones((20, 10, 8))
-    for i in range(20):
-        over_transition_factors[i][0][0] = 0
-        wicket_transition_factors[i][0][0] = 0
-    result = helper.__calculate_taus_semi_compressed(over_transition_factors, wicket_transition_factors)
-    print(result[:, :, 0])
-    #one_tau = simdatahelper._calculate_one_tau_compressed(3, 8, over_transition_factors, wicket_transition_factors)
-    #print("one tau", one_tau)
 
-"""def main():
+def main():
     # Just for testing
     simdatahelper = SimDataHelper()
     #simdatahelper.get_wicket_transition_factors()
@@ -565,7 +551,7 @@ def main():
     print(f"Final score: {score}/{wickets} in {ball_number//6}.{ball_number%6} overs")
 
     # Save outcomes to a csv file
-    pd.DataFrame(outcomes).to_csv('outcomes_from_sim.csv')"""
+    pd.DataFrame(outcomes).to_csv('outcomes_from_sim.csv')
 
 if __name__ == '__main__':
     main()
