@@ -30,7 +30,9 @@ class SimDataHelper:
 
     taus = None
 
-    is_initialized = False
+    outcomes_is_initialized = False
+    taus_is_initialized = False
+    baselines_is_initialized = False
 
     def __init__(self):
         self.batter_file = pd.read_csv(os.path.join(path, 'batter_runs.csv'))
@@ -43,6 +45,7 @@ class SimDataHelper:
 
         # Calculate batter outcome matrix
         self.batter_outcomes_matrix = self.__create_batter_outcome_matrix()
+        self.outcomes_is_initialized = True
 
         # The total number of outcomes for each batter
         self.batting_outcome_totals = np.ndarray((self.num_batters, 20, 10))
@@ -51,10 +54,12 @@ class SimDataHelper:
 
         # The taus
         self.taus = self.__calculate_taus_semi_compressed()
+        self.taus_is_initialized = True
 
         self.p_sampler = ParameterSampler(70, 1000, 500, self.batter_outcomes_matrix, self.taus)
         print("Sampling parameters...")
         self.p_sampler.initialize()
+        self.baselines_is_initialized = True
 
         self.is_initialized = True
 
@@ -72,7 +77,7 @@ class SimDataHelper:
             float: The probability of the outcome.
         """
 
-        assert self.is_initialized, 'Data helper has not been initialized.'
+        assert self.baselines_is_initialized, 'Parameter sampler has not been initialized.'
 
         return self.p_sampler.get_probability(batter, over, wicket)
 
@@ -88,7 +93,7 @@ class SimDataHelper:
         pd.DataFrame: A DataFrame containing the outcomes of the batter
         """
 
-        assert self.is_initialized
+        assert self.outcomes_is_initialized, 'Batting outcome matrix has not been initialized.'
 
         return self.batter_outcomes_matrix[batter - 1]
 
@@ -100,7 +105,7 @@ class SimDataHelper:
         np.ndarray: A matrix (20x10) containing the taus for each over,wicket game stage.
         """
 
-        assert self.is_initialized
+        assert self.taus_is_initialized, 'Taus have not been initialized.'
 
         return self.taus
     
@@ -117,7 +122,7 @@ class SimDataHelper:
         the number of balls batter i has faced at game stage (over, wickets)
         """
 
-        assert self.is_initialized
+        assert self.is_initialized, 'Data has not been initialized.'
 
         return self.batting_outcome_totals[batter, over, wicket]
 
