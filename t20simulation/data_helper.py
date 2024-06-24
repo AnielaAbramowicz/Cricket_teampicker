@@ -57,7 +57,7 @@ class SimDataHelper:
         self.taus = self.__calculate_taus_semi_compressed()
         self.taus_is_initialized = True
 
-        self.p_sampler = ParameterSampler(60, 1000, 500, self.batter_outcomes_matrix, self.taus)
+        self.p_sampler = ParameterSampler(60, 500, 100, self.batter_outcomes_matrix, self.taus)
         print("Sampling parameters...")
         self.p_sampler.initialize()
         self.baselines_is_initialized = True
