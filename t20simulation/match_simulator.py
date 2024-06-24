@@ -1,10 +1,14 @@
 import numpy as np
 import pandas as pd
+import os
 
 from parameter_estimation import ParameterSampler
 from data_helper import SimDataHelper
 
 class MatchSimulator:
+
+    # Path of this file
+    path = os.path.dirname(os.path.realpath(__file__))
 
     extra_prob = 0.033
 
@@ -36,7 +40,7 @@ class MatchSimulator:
         self.current_batter = None # i think we need to have this aswell
 
         self.helper = SimDataHelper
-        self.duckwort_lewis_table = pd.read_csv('data/duckworth_lewis.csv') #replace with actual path 
+        self.duckwort_lewis_table = pd.read_csv(os.path.join(self.path, 'duckworth_lewis.csv')) #replace with actual path 
         print('Initializing...')
         self.helper.initialize()
         print('Done.')
