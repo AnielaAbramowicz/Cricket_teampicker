@@ -15,6 +15,7 @@ class ParameterSampler():
         self.p_i70j = None
 
     def initialize(self):
+        self.a_j = self.calculate_a_j()
         self.p_i70j = self.sample_parameters()
 
     def get_probability(self, batter : int, over : int, wickets : int) -> float:

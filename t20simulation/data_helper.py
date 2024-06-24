@@ -50,7 +50,7 @@ class SimDataHelper:
         # The total number of outcomes for each batter
         self.batting_outcome_totals = np.ndarray((self.num_batters, 20, 10))
         for batter in range(1, self.num_batters+1):
-            self.batting_outcome_totals[batter, :, :] = self.get_outcomes_for_batter(batter).sum(axis=2)
+            self.batting_outcome_totals[batter-1, :, :] = self.get_outcomes_for_batter(batter).sum(axis=2)
 
         # The taus
         self.taus = self.__calculate_taus_semi_compressed()
