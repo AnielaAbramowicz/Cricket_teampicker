@@ -36,7 +36,7 @@ class MatchSimulator:
         self.current_batter = None # i think we need to have this aswell
 
         self.helper = SimDataHelper
-        self.duckwort_lewis_table = pd.read_csv('data/duckworth_lewis_table.csv') #replace with actual path 
+        self.duckwort_lewis_table = pd.read_csv('data/duckworth_lewis.csv') #replace with actual path 
         print('Initializing...')
         self.helper.initialize()
         print('Done.')
