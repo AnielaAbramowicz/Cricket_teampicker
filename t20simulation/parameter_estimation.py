@@ -49,7 +49,6 @@ class ParameterSampler():
             result[batter, :] =  self.metropolis_within_gibbs(batter)
 
         return result
-            
 
     def metropolis_within_gibbs(self, batter : int) -> float:
         """
@@ -69,7 +68,7 @@ class ParameterSampler():
                 #in this loop we sample the current outcome while we fix the other values of p
 
                 #calculate the proposed value of p_j
-                p_j_proposed = np.random.dirichlet(self.calc_exponent(batter, j))
+                p_j_proposed = np.random.dirichlet(self.calc_exponents(batter))[j]
 
                 #calculate the probability of the current and proposed values of p_j given the other values of p
                 p_current_j_replaced = p_current.copy() 
@@ -83,9 +82,7 @@ class ParameterSampler():
                 if np.random.uniform(0, 1) < alpha:
                     #we accept
                     p_current = p_current_j_replaced
-                else:
-                    #we reject
-                    pass
+
             if i > self.burn_in:
                 samples.append(p_current)
         
@@ -124,7 +121,7 @@ class ParameterSampler():
         """
         upper = 1.0
         for j in range(p.shape[0]):
-            upper *= p[j] ** (self.calc_exponent(j, p[j]))
+            upper *= p[j] ** (self.calc_exponent(batter, j))
 
         lower = 1.0
         # a big problem here is we have to know the sum over j of p_i_7_o_j even though we only know p_i_7_0_j
@@ -149,13 +146,29 @@ class ParameterSampler():
             outcome (int): the oucome
             batter (int): The batter index.
         Returns:
-            float: The calculated joint probability.
+            float: The exponent used in the joint probability calculation for the specified batting outcome.
         """
         exp = 0.0
         for over in range(self.outcomes.shape[1]):
             for wicket in range(self.outcomes.shape[2]):
                     exp += self.outcomes[batter, over, wicket, outcome]
         exp += (self.a_j[outcome] - 1)
+        return exp
+
+    def calc_exponents(self, batter : int) -> np.array:
+        """
+        Helper function that calculates the exponent of probablities in the joint probability calculation.
+
+        Args:
+            batter (int): The batter index.
+        Returns:
+            np.array[float]: The exponents used in the joint probability calculation for each batting outcome.
+        """
+        exp = np.zeros(self.outcomes.shape[3])
+        for over in range(self.outcomes.shape[1]):
+            for wicket in range(self.outcomes.shape[2]):
+                exp += self.outcomes[batter, over, wicket, :]
+        exp += (self.a_j - 1)
         return exp
     
 
