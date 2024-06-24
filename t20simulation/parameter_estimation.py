@@ -31,8 +31,11 @@ class ParameterSampler():
             float: The probability of the outcome.
         """
 
-        if self.p_i70j == None:
-            self.p_i70j = self.sample_parameters()
+        try:
+            if self.p_i70j == None:
+                self.p_i70j = self.sample_parameters()
+        except ValueError:
+            pass
 
         return self.taus[over, wickets, :] * self.p_i70j[batter, :] / np.sum(self.taus[over, wickets] * self.p_i70j[batter])
 
@@ -46,9 +49,13 @@ class ParameterSampler():
         result = np.zeros((self.outcomes.shape[0], self.outcomes.shape[3]))
 
         for batter in range(self.outcomes.shape[0]):
-            result[batter, :] =  self.metropolis_within_gibbs(batter)
+            #result[batter, :] =  self.metropolis_within_gibbs(batter)
+            result[batter, :] = self.simple_baselines(batter)
 
         return result
+
+    def simple_baselines(self, batter : int) -> np.ndarray:
+        return self.calc_exponents(batter) / np.sum(self.calc_exponents(batter))
 
     def metropolis_within_gibbs(self, batter : int) -> float:
         """
@@ -195,7 +202,8 @@ class ParameterSampler():
                 exp += self.outcomes[batter, over, wicket, :]
 
         if with_alpha:
-            exp += (self.a_j - 1)
+            #exp += (self.a_j - 1)
+            exp += (self.a_j)
 
         if np.any(exp < 0):
             print("Negative exponent")

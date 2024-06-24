@@ -75,9 +75,11 @@ class MatchSimulator:
             # Check if the outcome is a wicket
             if outcome == 7:
                 wickets += 1
+                if wickets == 10:
+                    break
                 on_strike = batting_order[wickets+1] # New batter on strike
             else:
-                score += outcome
+                runs += outcome
 
             # If it is the last ball of the over, change who is on strike
             if ball_number % 6  == 0:
