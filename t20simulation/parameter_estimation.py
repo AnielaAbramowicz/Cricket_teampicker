@@ -7,7 +7,7 @@ import pickle
 
 class ParameterSampler():
 
-    def __init__(self, c : int, num_iterations : int, burn_in : int, outcomes : np.ndarray, taus : np.ndarray):
+    def __init__(self, c : int, num_iterations : int, burn_in : int, outcomes : np.ndarray, taus : np.ndarray, for_batters=True):
         self.taus = taus
         self.outcomes = outcomes
         self.c = c
@@ -20,7 +20,7 @@ class ParameterSampler():
         self.a_j = self.calculate_a_j()
 
         # Check if baselines are pickled
-        p_i70j_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "pickle_jar/baselines.pkl")
+        p_i70j_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "pickle_jar/baseline_batters.pkl" if self.for_batters else "pickle_jar/baselines_bowlers.pkl")
         if os.path.exists(p_i70j_file):
             with open(p_i70j_file, 'rb') as f:
                 p_i70j = pickle.load(f)
