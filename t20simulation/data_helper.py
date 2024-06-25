@@ -30,6 +30,9 @@ class SimDataHelper:
 
     taus = None
 
+    batting_probability_matrix = None
+    bowler_probability_matrix = None
+
     outcomes_is_initialized = False
     taus_is_initialized = False
     baselines_is_initialized = False
@@ -62,12 +65,41 @@ class SimDataHelper:
         self.taus = self.__calculate_taus_semi_compressed()
         self.taus_is_initialized = True
 
-        self.batter_sampler = ParameterSampler(60, 500, 100, self.batter_outcomes_matrix, self.taus, for_batters=True)
-        #print("Sampling parameters...")
-        self.batter_sampler.initialize()
+        # Check if batting probabilities are pickled
+        if os.path.exists(os.path.join(path, 'pickle_jar/batting_probability_matrix.pkl')):
+            with open(os.path.join(path, 'pickle_jar/batting_probability_matrix.pkl'), 'rb') as f:
+                self.batting_probability_matrix = pickle.load(f)
+        else:
+            print('Calculating batting probability matrix...')
+            self.batter_sampler = ParameterSampler(60, 500, 100, self.batter_outcomes_matrix, self.taus, for_batters=True)
+            self.batter_sampler.initialize()
+            self.batting_probability_matrix = np.zeros((self.num_batters, 20, 10, 8))
+            for batter in range(1, self.num_batters+1):
+                print(f'Processing batter {batter} out of {self.num_batters}...', end='\r')
+                for over in range(0, 20):
+                    for wicket in range(0, 10):
+                        self.batting_probability_matrix[batter-1,over,wicket] = self.batter_sampler.get_probability_simple(batter-1, over, wicket)
+            with open(os.path.join(path, 'pickle_jar/batting_probability_matrix.pkl'), 'wb') as f:
+                pickle.dump(self.batting_probability_matrix, f)
 
-        self.bowler_sampler = ParameterSampler(60, 500, 100, self.bowler_outcome_matrix, self.taus, for_batters=False)
-        self.bowler_sampler.initialize()
+        self.average_batting_probabilities = np.mean(self.batting_probability_matrix, axis=0)
+
+        # Check if bowling probabilities are pickled
+        if os.path.exists(os.path.join(path, 'pickle_jar/bowling_probability_matrix.pkl')):
+            with open(os.path.join(path, 'pickle_jar/bowling_probability_matrix.pkl'), 'rb') as f:
+                self.bowler_probability_matrix = pickle.load(f)
+        else:
+            print('Calculating bowling probability matrix...')
+            self.bowler_sampler = ParameterSampler(60, 500, 100, self.bowler_outcome_matrix, self.taus, for_batters=False)
+            self.bowler_sampler.initialize()
+            self.bowler_probability_matrix = np.zeros((self.num_bowlers, 20, 10, 8))
+            for bowler in range(1, self.num_bowlers+1):
+                print(f'Processing bowler {bowler} out of {self.num_bowlers}...', end='\r')
+                for over in range(0, 20):
+                    for wicket in range(0, 10):
+                        self.bowler_probability_matrix[bowler-1,over,wicket] = self.bowler_sampler.get_probability_simple(bowler-1, over, wicket)
+            with open(os.path.join(path, 'pickle_jar/bowling_probability_matrix.pkl'), 'wb') as f:
+                pickle.dump(self.bowler_probability_matrix, f)
 
         self.baselines_is_initialized = True
 
@@ -100,7 +132,15 @@ class SimDataHelper:
 
         assert self.baselines_is_initialized, 'Parameter sampler has not been initialized.'
 
-        return self.batter_sampler.get_probability(batter, over, wicket) + self.bowler_sampler.get_probability(bowler, over, wicket) - self.batter_sampler.get_probability(-1, over, wicket)
+        result = self.batting_probability_matrix[batter, over, wicket] + self.bowler_probability_matrix[bowler, over, wicket] - self.average_batting_probabilities[over, wicket]
+
+        # Check for negative values
+        result[result < 0] = 0
+
+        # Normalize result
+        result = result / np.sum(result)
+
+        return result
 
     def get_batting_probabilities(self, batter, over, wicket):
         """
@@ -117,7 +157,7 @@ class SimDataHelper:
 
         assert self.baselines_is_initialized, 'Parameter sampler has not been initialized.'
 
-        return self.batter_sampler.get_probability(batter, over, wicket)
+        return self.batting_probability_matrix[batter, over, wicket]
         
     def get_bowling_probabilities(self, bowler, over, wicket):
         assert self.baselines_is_initialized, 'Parameter sampler has not been initialized.'

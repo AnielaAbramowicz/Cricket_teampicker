@@ -5,7 +5,7 @@ from match_simulator import MatchSimulator
 
 class ERD:
 
-    avg_runs = 190.8
+    avg_runs = 134.3843
 
     def __init__(self):
         pass
@@ -105,12 +105,6 @@ class ERD:
 
 def main():
     erd_calc = ERD()
-    print('Average runs scored:', erd_calc.calculate_average_runs_scored(10000))
-    erd, batting_contribution, bowling_contribution = erd_calc.calc_erd(1890-1, 427-1, True, 1000)
-    print('ERD:', erd)
-    print('Batting Contribution:', batting_contribution)
-    print('Bowling Contribution:', bowling_contribution)
-
     # Calculate erd for all players in the auction and 
 
     # Path of current file
@@ -131,18 +125,14 @@ def main():
     bowler_ids = np.unique(bowler_ids)
 
     # For each batter id, calculate the batting contribution
-    batting_contributions = pd.DataFrame(columns=['batter_id', 'batting_contribution'])
-    for batter_id in batter_ids:
-        batting_contributions[batter_id] = erd_calc.calculate_batting_contribution(batter_id, 1000)
-        # save to file
-        batting_contributions.to_csv('batting_contributions.csv')
 
     # For each bowler id, calculate the bowling contribution
-    bowling_contributions = pd.DataFrame(columns=['bowler_id', 'bowling_contribution'])
-    for bowler_id in bowler_ids:
-        bowling_contributions[bowler_id] = erd_calc.calculate_bowling_contribution(bowler_id, 1000)
+    bowling_contributions = pd.DataFrame(columns=['bowler_id', 'bowling_contribution']).set_index('bowler_id')
+    for i, bowler_id in enumerate(bowler_ids):
+        bowling_contributions.loc[bowler_id] = erd_calc.calculate_bowling_contribution(bowler_id-1, 2000)
+        print('Bowler', i, 'of', len(bowler_ids), 'has contribution of ', bowling_contributions.loc[bowler_id])
         # save to file
-        bowling_contributions.to_csv('bowling_contributions.csv')
+        bowling_contributions.to_csv('bowling_contributions_new.csv', index=True)
 
 if __name__ == '__main__':
     main()
