@@ -69,6 +69,16 @@ class SimDataHelper:
 
         self.is_initialized = True
 
+    def load_batter_baselines(self, batters):
+        """
+        Load the baselines for the batters
+
+        Args:
+            batters (list): A list of batter IDs
+        """
+
+        self.p_sampler.load_batter_baselines(batters)
+
 
     def get_batting_probabilities(self, batter, over, wicket):
         """
