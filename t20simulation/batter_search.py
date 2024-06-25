@@ -18,6 +18,29 @@ def same_person(name1, name2, exact=False):
 
     return same_surname and same_firstname
 
+def get_bowler_ids(bowler_names, bowler_file):
+    batter_ids = pd.read_csv(bowler_file)[['bowler', 'bowler id']]
+    batter_ids = batter_ids.drop_duplicates()
+    batter_ids.set_index('bowler', inplace=True)
+
+    ids = np.full(len(bowler_names), -1)
+
+    for i, b1 in enumerate(bowler_names):
+        found_id = -1
+        for b2 in batter_ids.index:
+            if b1 == b2:
+                found_id = batter_ids.loc[b2]['bowler id']
+                print("Exact match found for", b1, "with id", found_id)
+                break
+            if same_person(b1, b2):
+                if found_id != -1:
+                    print("Multiple bowlers found for", b1)
+                found_id = batter_ids.loc[b2]['bowler id']
+        ids[i] = found_id
+
+    return ids
+
+
 def get_batter_ids(batter_names, batter_file):
     batter_ids = pd.read_csv(batter_file)[['batter', 'batter id']]
     batter_ids = batter_ids.drop_duplicates()

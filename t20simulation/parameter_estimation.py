@@ -15,7 +15,7 @@ class ParameterSampler():
         self.num_iterations = num_iterations
         self.burn_in = burn_in
         self.for_batters = for_batters
-        self.p_i70j = np.full((outcomes.shape[0], outcomes.shape[3]), -1)
+        self.p_i70j = np.full((outcomes.shape[0], outcomes.shape[3]), -1.0)
 
     def initialize(self):
         self.a_j = self.calculate_a_j()
@@ -26,6 +26,7 @@ class ParameterSampler():
             with open(p_i70j_file, 'rb') as f:
                 p_i70j = pickle.load(f)
                 self.p_i70j = p_i70j
+
 
     def get_probability(self, batter : int, over : int, wickets : int) -> float:
         """
@@ -42,7 +43,12 @@ class ParameterSampler():
 
         # We check if the parameters have been sampled for this batter, if not we sample them
         if self.p_i70j[batter, 0] == -1 and batter != -1:
-            self.p_i70j = self.sample_parameters(batter)
+            baselines = self.sample_parameters(batter)
+            self.p_i70j[batter, :] = baselines
+            # pickle
+            p_i70j_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "pickle_jar/baseline_batters.pkl" if self.for_batters else "pickle_jar/baselines_bowlers.pkl")
+            with open(p_i70j_file, 'wb') as f:
+                pickle.dump(self.p_i70j, f)
 
         return self.taus[over, wickets, :] * self.p_i70j[batter, :] / np.sum(self.taus[over, wickets] * self.p_i70j[batter])
 
@@ -61,6 +67,7 @@ class ParameterSampler():
             return self.a_j / np.sum(self.a_j)
 
         result = self.metropolis_within_gibbs(batter)
+
         return result
 
     def sample_parameters_full(self) -> np.ndarray:

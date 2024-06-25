@@ -118,6 +118,11 @@ class SimDataHelper:
         assert self.baselines_is_initialized, 'Parameter sampler has not been initialized.'
 
         return self.batter_sampler.get_probability(batter, over, wicket)
+        
+    def get_bowling_probabilities(self, bowler, over, wicket):
+        assert self.baselines_is_initialized, 'Parameter sampler has not been initialized.'
+
+        return self.bowler_sampler.get_probability(bowler, over, wicket)
 
 
     def get_outcomes_for_batter(self, batter : int) -> np.ndarray:
