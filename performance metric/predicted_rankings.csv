@@ -1,54 +1,138 @@
 ,team_name,rank_pm1,rank_pm2,rank_pm3,year
-0,Kolkata Night Riders,1,2,2,2018
-1,Mumbai Indians,4,1,7,2018
-2,Kings XI Punjab,3,6,3,2018
-3,Sunrisers Hyderbad,2,3,5,2018
-4,Rajasthan Royals,6,5,8,2018
-5,Delhi Capitals,7,4,4,2018
-6,Royal Challengers Bangalore,5,7,1,2018
-7,Chennai Super Kings,8,8,6,2018
-8,Kolkata Night Riders,1,1,1,2019
-9,Chennai Super Kings,2,2,2,2019
-10,Mumbai Indians,3,3,3,2019
-11,Delhi Capitals,4,4,4,2019
-12,Kings XI Punjab,5,5,5,2019
-13,Rajasthan Royals,6,6,6,2019
-14,Royal Challengers Bangalore,7,7,7,2019
-15,Sunrisers Hyderabad,8,8,8,2019
-16,Kings XI Punjab ,9,9,9,2019
-17,Chennai Super Kings,1,1,1,2020
-18,Delhi Capitals,2,2,2,2020
-19,Kolkata Knight Riders,3,3,3,2020
-20,Mumbai Indians,4,4,4,2020
-21,Punjab Kings,5,5,5,2020
-22,Rajasthan Royals,6,6,6,2020
-23,Royal Challengers Bangalore,7,7,7,2020
-24,Sunrisers Hyderabad,8,8,8,2020
-25,Sunrisers Hyderabad,1,1,1,2021
-26,Royal Challengers Bangalore,2,2,2,2021
-27,Rajasthan Royals,3,3,3,2021
-28,Punjab Kings,4,4,4,2021
-29,Mumbai Indians,5,5,5,2021
-30,Kolkata Knight Riders,6,6,6,2021
-31,Delhi Capitals,7,7,7,2021
-32,Chennai Super Kings,8,8,8,2021
-33,Chennai Super Kings,1,1,1,2022
-34,Delhi Capitals,2,2,2,2022
-35,Gujarat Titans,3,3,3,2022
-36,Kolkate Knight Riders,4,4,4,2022
-37,Lucknow Super Giants,5,5,5,2022
-38,Mumbai Indians,6,6,6,2022
-39,Punjab Kings,7,7,7,2022
-40,Rajasthan Royals,8,8,8,2022
-41,Royal Challengers Bangalore,9,9,9,2022
-42,Sunrisers Hyderabad,10,10,10,2022
-43,Chennai Super Kings,1,1,1,2023
-44,Delhi Capitals,2,2,2,2023
-45,Gujarat Titans,3,3,3,2023
-46,Kolkata Knight Riders,4,4,4,2023
-47,Lucknow Super Giants,5,5,5,2023
-48,Mumbai Indians,6,6,6,2023
-49,Punjab Kings,7,7,7,2023
-50,Rajasthan Royals,8,8,8,2023
-51,Royal Challengers Bangalore,9,9,9,2023
-52,Sunrisers Hyderabad,10,10,10,2023
+0,Chennai Super Kings,2,4,1,2008
+1,Rajasthan Royals,4,2,3,2008
+2,Royal Challengers Bangalore,8,8,6,2008
+3,Kolkata Knight Riders,7,7,4,2008
+4,Delhi Capitals,5,3,2,2008
+5,Kings XI Punjab,1,1,5,2008
+6,Mumbai Indians,6,6,8,2008
+7,Sunrisers Hyderabad,3,5,7,2008
+8,Rajasthan Royals,8,8,6,2009
+9,Chennai Super Kings,4,2,4,2009
+10,Sunrisers Hyderabad,3,1,5,2009
+11,Royal Challengers Bangalore,2,4,7,2009
+12,Kolkata Knight Riders,1,7,8,2009
+13,Delhi Capitals,5,3,3,2009
+14,Kings XI Punjab,7,5,1,2009
+15,Mumbai Indians,6,6,2,2009
+16,Rajasthan Royals,5,7,7,2010
+17,Sunrisers Hyderabad,8,6,2,2010
+18,Kolkata Knight Riders,3,8,1,2010
+19,Royal Challengers Bangalore,7,4,3,2010
+20,Mumbai Indians,4,1,8,2010
+21,Delhi Capitals,1,5,6,2010
+22,Kings XI Punjab,2,3,5,2010
+23,Chennai Super Kings,6,2,4,2010
+24,Mumbai Indians,4,4,1,2011
+25,Chennai Super Kings,2,2,3,2011
+26,Kolkata Knight Riders,3,6,6,2011
+27,Lucknow Super Giants,5,10,9,2011
+28,Kings XI Punjab,7,3,5,2011
+29,Sunrisers Hyderabad,9,5,2,2011
+30,Royal Challengers Bangalore,1,1,10,2011
+31,Rajasthan Royals,8,9,4,2011
+32,Kochi Tuskers Kerala,10,8,7,2011
+33,Delhi Capitals,6,7,8,2011
+34,Mumbai Indians,9,7,2,2012
+35,Lucknow Super Giants,7,9,5,2012
+36,Sunrisers Hyderabad,3,5,7,2012
+37,Rajasthan Royals,5,4,3,2012
+38,Delhi Capitals,1,1,6,2012
+39,Royal Challengers Bangalore,4,2,8,2012
+40,Kings XI Punjab,2,8,9,2012
+41,Chennai Super Kings,6,3,4,2012
+42,Kolkata Knight Riders,8,6,1,2012
+43,Lucknow Super Giants,2,6,9,2013
+44,Mumbai Indians,6,3,3,2013
+45,Sunrisers Hyderabad,9,9,2,2013
+46,Kolkata Knight Riders,5,8,8,2013
+47,Royal Challengers Bangalore,1,2,5,2013
+48,Delhi Capitals,3,7,7,2013
+49,Kings XI Punjab,4,5,4,2013
+50,Rajasthan Royals,8,4,6,2013
+51,Chennai Super Kings,7,1,1,2013
+52,Rajasthan Royals,3,7,7,2014
+53,Kolkata Knight Riders,4,4,3,2014
+54,Delhi Capitals,6,6,5,2014
+55,Mumbai Indians,5,3,4,2014
+56,Kings XI Punjab,1,1,6,2014
+57,Chennai Super Kings,2,2,2,2014
+58,Sunrisers Hyderabad,8,5,1,2014
+59,Royal Challengers Bangalore,7,8,8,2014
+60,Mumbai Indians,1,1,7,2015
+61,Kolkata Knight Riders,5,5,5,2015
+62,Delhi Capitals,2,6,3,2015
+63,Kings XI Punjab,8,8,4,2015
+64,Rajasthan Royals,6,7,1,2015
+65,Chennai Super Kings,7,2,2,2015
+66,Sunrisers Hyderabad,3,4,6,2015
+67,Royal Challengers Bangalore,4,3,8,2015
+68,Mumbai Indians,7,6,1,2016
+69,Sunrisers Hyderabad,2,2,6,2016
+70,Kings XI Punjab,5,8,7,2016
+71,Delhi Capitals,3,3,4,2016
+72,Kolkata Knight Riders,6,5,2,2016
+73,Royal Challengers Bangalore,1,1,8,2016
+74,Lucknow Super Giants,4,7,3,2016
+75,Gujarat Titans,8,4,5,2016
+76,Sunrisers Hyderabad,1,2,6,2017
+77,Kings XI Punjab,5,6,3,2017
+78,Gujarat Titans,4,4,2,2017
+79,Kolkata Knight Riders,3,1,5,2017
+80,Delhi Capitals,7,7,4,2017
+81,Royal Challengers Bangalore,8,8,1,2017
+82,Lucknow Super Giants,6,5,7,2017
+83,Mumbai Indians,2,3,8,2017
+84,Mumbai Indians,6,6,2,2018
+85,Kolkata Night Riders,5,2,4,2018
+86,Royal Challengers Bangalore,2,4,7,2018
+87,Sunrisers Hyderbad,4,1,6,2018
+88,Kings XI Punjab,7,8,1,2018
+89,Chennai Super Kings,3,5,5,2018
+90,Rajasthan Royals,8,7,3,2018
+91,Delhi Capitals,1,3,8,2018
+92,Delhi Capitals,8,8,4,2019
+93,Mumbai Indians,5,3,6,2019
+94,Kolkata Night Riders,2,1,8,2019
+95,Chennai Super Kings,6,6,2,2019
+96,Kings XI Punjab,4,5,5,2019
+97,Royal Challengers Bangalore,3,2,7,2019
+98,Sunrisers Hyderabad,7,7,3,2019
+99,Rajasthan Royals,1,4,9,2019
+100,Kings XI Punjab ,9,9,1,2019
+101,Mumbai Indians,4,1,4,2020
+102,Sunrisers Hyderabad,3,2,5,2020
+103,Kolkata Knight Riders,8,8,3,2020
+104,Chennai Super Kings,6,7,1,2020
+105,Kings XI Punjab,2,5,7,2020
+106,Royal Challengers Bangalore,7,6,2,2020
+107,Rajasthan Royals,1,3,8,2020
+108,Delhi Capitals,5,4,6,2020
+109,Sunrisers Hyderabad,7,8,4,2021
+110,Royal Challengers Bangalore,8,7,1,2021
+111,Mumbai Indians,3,6,3,2021
+112,Kolkata Knight Riders,6,3,5,2021
+113,Chennai Super Kings,1,1,2,2021
+114,Kings XI Punjab,2,5,8,2021
+115,Rajasthan Royals,5,2,6,2021
+116,Delhi Capitals,4,4,7,2021
+117,Mumbai Indians,7,8,1,2022
+118,Lucknow Super Giants,1,2,10,2022
+119,Rajasthan Royals,5,1,8,2022
+120,Gujarat Titans,3,3,4,2022
+121,Kolkate Knight Riders,8,10,7,2022
+122,Chennai Super Kings,4,4,6,2022
+123,Delhi Capitals,2,6,9,2022
+124,Kings XI Punjab,10,9,2,2022
+125,Royal Challengers Bangalore,6,5,3,2022
+126,Sunrisers Hyderabad,9,7,5,2022
+127,Kings XI Punjab,3,7,10,2023
+128,Lucknow Super Giants,8,8,2,2023
+129,Rajasthan Royals,9,5,1,2023
+130,Kolkata Knight Riders,7,6,4,2023
+131,Royal Challengers Bangalore,2,3,9,2023
+132,Delhi Capitals,10,10,6,2023
+133,Sunrisers Hyderabad,6,9,8,2023
+134,Gujarat Titans,1,1,7,2023
+135,Chennai Super Kings,4,2,3,2023
+136,Mumbai Indians,5,4,5,2023

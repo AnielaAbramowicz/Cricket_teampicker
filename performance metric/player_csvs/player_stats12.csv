@@ -1,0 +1,189 @@
+player,runs,balls,4s,6s,batting SR,batting average,times dismissed,balls bowled,runs conceded,wickets,economy,bowling average,bowling SR,overs bowled,wides,noballs,Player_Id,Player_Name,team
+MM Patel,2,7,0,0,28.57,2,0,288,370,15,7.93,24.67,19.2,46.67,4,4,126,MM Patel,Mumbai Indians
+LJ Wright,0,0,0,0,,0,0,12,24,0,12,,,2,0,0,358,LJ Wright,Pune Warriors
+CA Lynn,6,9,1,0,66.67,6,1,0,0,0,,,,0,0,0,336,CA Lynn,Deccan Chargers
+R Sharma,2,11,0,0,18.18,0.5,4,224,303,9,8.19,33.67,24.89,37,2,0,235,R Sharma,Pune Warriors
+SP Goswami,69,67,4,1,102.99,13.8,5,0,0,0,,,,0,0,0,132,SP Goswami,Rajasthan Royals
+M Kartik,26,21,1,1,123.81,26,0,225,266,4,7.39,66.5,56.25,36,8,1,83,M Kartik,Pune Warriors
+TL Suman,15,19,1,1,78.95,7.5,2,0,0,0,,,,0,0,0,178,TL Suman,Mumbai Indians
+V Sehwag,495,307,57,19,161.24,33,15,24,45,0,11.25,,,4,0,0,41,V Sehwag,Delhi Daredevils
+TM Dilshan,285,259,33,5,110.04,35.62,8,44,77,0,11,,,7,2,0,135,TM Dilshan,Royal Challengers Bangalore
+KC Sangakkara,200,183,21,4,109.29,18.18,11,0,0,0,,,,0,0,0,26,KC Sangakkara,Deccan Chargers
+AA Jhunjhunwala,24,26,1,1,92.31,12,2,36,38,1,6.33,,36,6,0,0,211,AA Jhunjhunwala,Deccan Chargers
+DL Vettori,31,26,3,1,119.23,7.75,4,212,236,5,6.74,47.2,42.4,35,2,0,175,DL Vettori,Royal Challengers Bangalore
+BA Bhatt,6,2,0,1,300,6,0,100,139,2,8.42,,50,16.5,0,1,302,BA Bhatt,Kings XI Punjab
+M Manhas,120,96,10,4,125,30,4,0,0,0,,,,0,0,0,171,M Manhas,Pune Warriors
+DR Smith,157,97,18,7,161.86,39.25,4,79,96,2,7.38,,39.5,13,0,1,147,DR Smith,Mumbai Indians
+LRPL Taylor,197,171,12,7,115.2,19.7,10,0,0,0,,,,0,0,0,52,LRPL Taylor,Delhi Daredevils
+MK Pandey,143,110,12,6,130,20.43,7,0,0,0,,,,0,0,0,96,MK Pandey,Pune Warriors
+DE Bollinger,3,5,0,0,60,3,1,113,157,8,8.72,19.62,14.12,18,5,0,248,DE Bollinger,Chennai Super Kings
+S Aravind,14,8,3,0,175,14,0,18,48,0,16,,,3,0,0,270,S Aravind,Royal Challengers Bangalore
+JD Ryder,256,211,23,8,121.33,25.6,10,43,73,1,10.43,,43,7,1,0,157,JD Ryder,Pune Warriors
+UT Yadav,2,7,0,0,28.57,1,2,383,453,19,7.43,23.84,20.16,61,14,3,232,UT Yadav,Delhi Daredevils
+JP Faulkner,14,13,0,0,107.69,14,1,49,72,3,9,,16.33,8,1,0,310,JP Faulkner,Kings XI Punjab
+HH Gibbs,81,88,8,2,92.05,40.5,2,0,0,0,,,,0,0,0,97,HH Gibbs,Mumbai Indians
+K Upadhyay,11,8,0,1,137.5,11,0,24,33,0,8.25,,,4,0,0,332,K Upadhyay,Pune Warriors
+CJ Ferguson,50,63,3,0,79.37,12.5,4,0,0,0,,,,0,0,0,295,CJ Ferguson,Pune Warriors
+SB Jakati,7,12,0,0,58.33,7,0,248,336,9,8.2,37.33,27.56,41,2,0,186,SB Jakati,Chennai Super Kings
+YK Pathan,194,166,10,7,116.87,19.4,10,137,182,3,8.27,60.67,45.67,22,5,0,31,YK Pathan,Kolkata Knight Riders
+AG Murtaza,3,5,0,0,60,3,0,12,11,0,5.5,,,2,0,0,286,AG Murtaza,Pune Warriors
+PA Patel,194,164,19,4,118.29,17.64,11,0,0,0,,,,0,0,0,17,PA Patel,Deccan Chargers
+SP Narine,9,7,2,0,128.57,9,1,357,327,24,5.53,13.62,14.88,59.17,2,0,315,SP Narine,Kolkata Knight Riders
+S Anirudha,19,6,1,2,316.67,19,0,0,0,0,,,,0,0,0,125,S Anirudha,Chennai Super Kings
+DW Steyn,19,21,0,1,90.48,3.8,5,289,285,18,6.11,15.83,16.06,46.67,8,1,94,DW Steyn,Deccan Chargers
+JP Duminy,244,190,13,11,128.42,81.33,3,78,104,1,8.67,,78,12,6,0,154,JP Duminy,Deccan Chargers
+CH Gayle,733,451,46,59,162.53,61.08,12,30,66,0,14.13,,,4.67,2,0,162,CH Gayle,Royal Challengers Bangalore
+AM Nayar,45,49,2,1,91.84,15,3,6,16,0,16,,,1,0,0,48,AM Nayar,Kings XI Punjab
+DJ Harris,111,101,11,5,109.9,27.75,4,18,26,0,8.67,,,3,0,0,313,DJ Harris,Deccan Chargers
+J Theron,7,6,1,0,116.67,7,0,51,66,2,8.25,,25.5,8,2,1,233,J Theron,Deccan Chargers
+RR Bhatkal,0,2,0,0,0,0,1,12,35,0,17.5,,,2,0,0,317,RR Bhatkal,Royal Challengers Bangalore
+SR Tendulkar,324,283,39,4,114.49,27,12,0,0,0,,,,0,0,0,133,SR Tendulkar,Mumbai Indians
+VY Mahesh,0,0,0,0,,0,0,61,82,3,8.79,,20.33,9.33,5,0,91,VY Mahesh,Chennai Super Kings
+SK Raina,441,324,36,19,136.11,25.94,17,85,105,2,7.5,,42.5,14,1,0,21,SK Raina,Chennai Super Kings
+A Mithun,0,0,0,0,,0,0,19,33,0,11,,,3,1,0,244,A Mithun,Royal Challengers Bangalore
+GB Hogg,15,16,1,0,93.75,7.5,2,220,257,10,7.14,25.7,22,36,3,1,316,GB Hogg,Rajasthan Royals
+Harpreet Singh,6,6,0,0,100,6,1,0,0,0,,,,0,0,0,287,Harpreet Singh,Pune Warriors
+Mandeep Singh,432,341,53,7,126.69,27,16,0,0,0,,,,0,0,0,236,Mandeep Singh,Kings XI Punjab
+KK Cooper,38,19,3,3,200,19,2,149,177,10,7.38,17.7,14.9,24,5,0,309,KK Cooper,Rajasthan Royals
+MD Mishra,4,4,1,0,100,4,1,0,0,0,,,,0,0,0,231,MD Mishra,Pune Warriors
+R Ashwin,18,15,2,0,120,6,3,402,432,14,6.56,30.86,28.71,65.83,6,1,201,R Ashwin,Chennai Super Kings
+MA Agarwal,225,157,19,15,143.31,20.45,11,0,0,0,,,,0,0,0,260,MA Agarwal,Royal Challengers Bangalore
+M de Lange,0,0,0,0,,0,0,64,107,3,10.7,,21.33,10,3,1,389,M de Lange,Kolkata Knight Riders
+JD Unadkat,0,0,0,0,,0,0,18,32,0,10.67,,,3,0,0,346,JD Unadkat,Kolkata Knight Riders
+RV Uthappa,405,342,38,10,118.42,27,15,0,0,0,,,,0,0,0,46,RV Uthappa,Pune Warriors
+J Syed Mohammad,4,1,1,0,400,4,0,43,65,0,9.29,,,7,1,0,283,J Syed Mohammad,Royal Challengers Bangalore
+G Gambhir,590,411,64,17,143.55,36.88,16,0,0,0,,,,0,0,0,40,G Gambhir,Kolkata Knight Riders
+NV Ojha,255,223,21,13,114.35,23.18,11,0,0,0,,,,0,0,0,183,NV Ojha,Delhi Daredevils
+R Shukla,0,0,0,0,,0,0,19,31,0,10.33,,,3,1,0,342,R Shukla,Mumbai Indians
+MK Tiwary,260,246,21,3,105.69,26,10,0,0,0,,,,0,0,0,87,MK Tiwary,Kolkata Knight Riders
+P Parameswaran,0,1,0,0,0,0,0,62,87,5,8.7,,12.4,10,2,0,294,P Parameswaran,Royal Challengers Bangalore
+DPMD Jayawardene,335,298,39,3,112.42,27.92,12,0,0,0,,,,0,0,0,64,DPMD Jayawardene,Delhi Daredevils
+MS Gony,4,8,0,0,50,4,1,151,213,3,8.88,71,50.33,24,6,1,120,MS Gony,Deccan Chargers
+PA Reddy,73,59,6,2,123.73,24.33,3,0,0,0,,,,0,0,0,331,PA Reddy,Deccan Chargers
+KMDN Kulasekara,5,3,1,0,166.67,5,0,88,94,4,6.71,,22,14,4,0,324,KMDN Kulasekara,Chennai Super Kings
+M Vijay,336,265,39,10,126.79,25.85,13,0,0,0,,,,0,0,0,185,M Vijay,Chennai Super Kings
+STR Binny,90,67,9,3,134.33,22.5,4,60,78,3,7.8,,20,10,0,0,255,STR Binny,Rajasthan Royals
+DB Ravi Teja,4,4,1,0,100,2,2,0,0,0,,,,0,0,0,112,DB Ravi Teja,Deccan Chargers
+S Dhawan,569,438,58,18,129.91,40.64,14,37,58,3,9.67,,12.33,6,1,0,42,S Dhawan,Deccan Chargers
+CJ McKay,8,15,0,0,53.33,8,1,42,60,1,8.57,,42,7,0,0,318,CJ McKay,Mumbai Indians
+SR Watson,255,168,26,14,151.79,42.5,6,144,161,6,7,26.83,24,23,5,1,32,SR Watson,Rajasthan Royals
+DAJ Bracewell,12,9,1,0,133.33,12,0,25,32,3,8,,8.33,4,1,0,312,DAJ Bracewell,Delhi Daredevils
+Harmeet Singh,15,7,3,0,214.29,15,1,141,192,7,8.6,27.43,20.14,22.33,5,2,256,Harmeet Singh,Kings XI Punjab
+IK Pathan,176,126,14,6,139.68,25.14,7,366,465,8,7.75,58.12,45.75,60,6,0,29,IK Pathan,Delhi Daredevils
+V Pratap Singh,0,1,0,0,0,0,1,211,296,10,8.71,29.6,21.1,34,7,0,326,V Pratap Singh,Deccan Chargers
+P Awana,4,5,0,0,80,4,0,296,375,17,7.98,22.06,17.41,47,13,1,333,P Awana,Kings XI Punjab
+RA Jadeja,191,151,13,9,126.49,15.92,12,216,274,12,7.83,22.83,18,35,6,0,35,RA Jadeja,Chennai Super Kings
+DB Das,126,92,9,6,136.96,42,3,0,0,0,,,,0,0,0,95,DB Das,Kolkata Knight Riders
+R Bhatia,35,28,4,0,125,11.67,3,323,393,13,7.39,30.23,24.85,53.17,3,1,89,R Bhatia,Kolkata Knight Riders
+PP Ojha,4,13,0,0,30.77,2,2,186,220,9,7.33,24.44,20.67,30,5,1,131,PP Ojha,Mumbai Indians
+V Kohli,364,325,33,10,112,28,13,18,49,0,16.33,,,3,0,0,8,V Kohli,Royal Challengers Bangalore
+AP Majumdar,87,76,7,2,114.47,21.75,4,0,0,0,,,,0,0,0,330,AP Majumdar,Pune Warriors
+BW Hilfenhaus,0,0,0,0,,0,0,215,236,14,6.94,16.86,15.36,34,9,2,451,BW Hilfenhaus,Chennai Super Kings
+Iqbal Abdulla,2,3,0,0,66.67,2,0,134,144,4,6.55,36,33.5,22,2,0,140,Iqbal Abdulla,Kolkata Knight Riders
+AB de Villiers,319,197,26,15,161.93,39.88,8,0,0,0,,,,0,0,0,110,AB de Villiers,Royal Challengers Bangalore
+DJ Jacobs,0,10,0,0,0,0,1,0,0,0,,,,0,0,0,263,DJ Jacobs,Mumbai Indians
+MEK Hussey,261,236,28,8,110.59,32.62,8,0,0,0,,,,0,0,0,19,MEK Hussey,Chennai Super Kings
+SL Malinga,55,53,4,3,103.77,9.17,6,351,353,22,6.36,16.05,15.95,55.5,17,1,194,SL Malinga,Mumbai Indians
+BJ Hodge,245,173,18,9,141.62,30.62,8,12,21,1,10.5,,12,2,0,0,104,BJ Hodge,Rajasthan Royals
+Bipul Sharma,72,47,6,3,153.19,24,3,48,79,0,10.3,,,7.67,2,0,228,Bipul Sharma,Kings XI Punjab
+KD Karthik,238,212,30,2,112.26,18.31,13,0,0,0,,,,0,0,0,88,KD Karthik,Mumbai Indians
+JA Morkel,107,68,5,6,157.35,15.29,7,315,385,13,7.78,29.62,24.23,49.5,17,1,109,JA Morkel,Chennai Super Kings
+KP Pietersen,305,207,22,20,147.34,61,5,40,53,0,8.83,,,6,4,0,158,KP Pietersen,Delhi Daredevils
+Sunny Gupta,0,1,0,0,0,0,1,19,47,0,15.67,,,3,1,0,337,Sunny Gupta,Delhi Daredevils
+JH Kallis,409,382,34,10,107.07,25.56,16,336,404,15,7.48,26.93,22.4,54,10,2,9,JH Kallis,Kolkata Knight Riders
+P Negi,36,29,4,1,124.14,18,2,133,152,7,6.91,21.71,19,22,1,0,322,P Negi,Delhi Daredevils
+Y Nagar,153,133,13,3,115.04,30.6,5,7,10,0,10,,,1,1,0,199,Y Nagar,Delhi Daredevils
+LR Shukla,75,57,4,5,131.58,12.5,6,12,12,1,6,,12,2,0,0,63,LR Shukla,Kolkata Knight Riders
+B Kumar,40,40,4,0,100,13.33,3,240,285,8,7.31,35.62,30,39,5,1,299,B Kumar,Pune Warriors
+AB Agarkar,0,0,0,0,,0,0,90,134,3,9.35,,30,14.33,4,0,82,AB Agarkar,Delhi Daredevils
+SD Chitnis,66,62,7,1,106.45,22,3,0,0,0,,,,0,0,0,148,SD Chitnis,Kings XI Punjab
+S Nadeem,0,2,0,0,0,0,0,275,318,8,7.07,39.75,34.38,45,5,0,293,S Nadeem,Delhi Daredevils
+A Chandila,0,1,0,0,0,0,0,84,86,5,6.14,,16.8,14,0,0,335,A Chandila,Rajasthan Royals
+DA Miller,98,75,6,4,130.67,32.67,3,0,0,0,,,,0,0,0,320,DA Miller,Kings XI Punjab
+SE Marsh,336,280,39,7,120,30.55,11,0,0,0,,,,0,0,0,100,SE Marsh,Kings XI Punjab
+B Lee,42,20,2,4,210,21,2,234,300,7,7.89,42.86,33.43,38,4,2,66,B Lee,Kolkata Knight Riders
+RJ Harris,18,11,1,1,163.64,18,1,109,133,8,7.39,16.62,13.62,18,1,0,188,RJ Harris,Kings XI Punjab
+BB McCullum,289,283,37,3,102.12,24.08,12,0,0,0,,,,0,0,0,2,BB McCullum,Kolkata Knight Riders
+PP Chawla,106,88,9,4,120.45,13.25,8,346,423,16,7.42,26.44,21.62,57,4,0,67,PP Chawla,Kings XI Punjab
+Y Venugopal Rao,132,126,8,5,104.76,22,6,12,26,0,13,,,2,0,0,54,Y Venugopal Rao,Delhi Daredevils
+A Nehra,11,12,1,0,91.67,11,0,291,404,11,8.42,36.73,26.45,48,1,2,73,A Nehra,Pune Warriors
+SW Tait,0,0,0,0,,0,0,157,151,6,6.61,25.17,26.17,22.83,18,2,238,SW Tait,Rajasthan Royals
+MS Dhoni,358,275,26,9,130.18,29.83,12,0,0,0,,,,0,0,0,20,MS Dhoni,Chennai Super Kings
+Gurkeerat Singh,86,52,12,2,165.38,28.67,3,0,0,0,,,,0,0,0,329,Gurkeerat Singh,Kings XI Punjab
+AD Russell,47,26,3,3,180.77,23.5,2,98,161,1,10.06,,98,16,1,1,334,AD Russell,Delhi Daredevils
+DH Yagnik,25,13,5,0,192.31,25,1,0,0,0,,,,0,0,0,277,DH Yagnik,Rajasthan Royals
+RJ Peterson,32,30,3,1,106.67,10.67,3,48,70,3,8.75,,16,8,0,0,323,RJ Peterson,Mumbai Indians
+AC Thomas,19,15,1,1,126.67,9.5,2,87,112,3,8,,29,14,2,1,274,AC Thomas,Pune Warriors
+J Botha,58,54,4,1,107.41,14.5,4,251,297,9,7.24,33,27.89,41,5,0,192,J Botha,Rajasthan Royals
+PC Valthaty,30,51,4,0,58.82,5,6,6,16,0,16,,,1,0,0,167,PC Valthaty,Kings XI Punjab
+Z Khan,12,17,1,0,70.59,6,2,370,459,17,7.65,27,21.76,60,10,0,15,Z Khan,Royal Challengers Bangalore
+M Kaif,14,16,1,0,87.5,14,1,0,0,0,,,,0,0,0,33,M Kaif,Royal Challengers Bangalore
+WP Saha,6,14,0,0,42.86,6,1,0,0,0,,,,0,0,0,62,WP Saha,Chennai Super Kings
+RE van der Merwe,0,0,0,0,,0,0,61,60,2,6,,30.5,10,1,0,177,RE van der Merwe,Delhi Daredevils
+Azhar Mahmood,186,142,16,8,130.99,23.25,8,265,329,14,7.71,23.5,18.93,42.67,7,2,321,Azhar Mahmood,Kings XI Punjab
+Harbhajan Singh,108,80,14,3,135,12,9,335,384,6,7.11,64,55.83,54,11,0,50,Harbhajan Singh,Mumbai Indians
+R Vinay Kumar,68,62,3,2,109.68,13.6,5,346,482,19,8.63,25.37,18.21,55.83,9,2,81,R Vinay Kumar,Royal Challengers Bangalore
+M Muralitharan,6,9,0,0,66.67,3,2,245,261,15,6.53,17.4,16.33,40,5,0,121,M Muralitharan,Royal Challengers Bangalore
+AB Dinda,2,5,0,0,40,2,1,154,169,9,7.04,18.78,17.11,24,6,4,106,AB Dinda,Pune Warriors
+L Balaji,0,0,0,0,,0,0,189,162,11,5.4,14.73,17.18,30,9,0,151,L Balaji,Kolkata Knight Riders
+OA Shah,340,255,24,16,133.33,37.78,9,0,0,0,,,,0,0,0,204,OA Shah,Rajasthan Royals
+VR Aaron,1,3,0,0,33.33,0.5,2,192,274,8,8.84,34.25,24,31,6,0,296,VR Aaron,Delhi Daredevils
+P Dogra,15,24,0,0,62.5,7.5,2,0,0,0,,,,0,0,0,212,P Dogra,Kings XI Punjab
+KP Appanna,0,0,0,0,,0,0,107,148,6,8.71,24.67,17.83,17,5,0,181,KP Appanna,Royal Challengers Bangalore
+SA Yadav,0,4,0,0,0,0,1,0,0,0,,,,0,0,0,308,SA Yadav,Mumbai Indians
+AM Rahane,560,433,73,10,129.33,40,14,0,0,0,,,,0,0,0,85,AM Rahane,Rajasthan Royals
+AD Mathews,127,108,5,4,117.59,18.14,7,158,192,7,7.38,27.43,22.57,26,2,0,191,AD Mathews,Pune Warriors
+JEC Franklin,220,222,15,7,99.1,24.44,9,92,124,6,8.27,,15.33,15,2,0,275,JEC Franklin,Mumbai Indians
+RE Levi,83,73,10,4,113.7,13.83,6,0,0,0,,,,0,0,0,304,RE Levi,Mumbai Indians
+F du Plessis,398,303,29,17,131.35,33.17,12,6,16,0,16,,,1,0,0,303,F du Plessis,Chennai Super Kings
+DJ Hussey,396,305,28,17,129.84,33,12,55,64,3,7.11,,18.33,9,1,0,4,DJ Hussey,Kings XI Punjab
+DJ Bravo,371,262,20,20,141.6,46.38,8,363,463,15,8.03,30.87,24.2,57.67,17,0,71,DJ Bravo,Chennai Super Kings
+AUK Pathan,6,7,0,0,85.71,6,1,6,14,0,14,,,1,0,0,261,AUK Pathan,Royal Challengers Bangalore
+AT Rayudu,333,252,21,14,132.14,37,9,0,0,0,,,,0,0,0,208,AT Rayudu,Mumbai Indians
+DA Warner,256,155,28,14,165.16,36.57,7,0,0,0,,,,0,0,0,187,DA Warner,Delhi Daredevils
+KA Pollard,220,158,15,14,139.24,24.44,9,286,350,16,7.99,21.88,17.88,43.83,22,1,221,KA Pollard,Mumbai Indians
+GJ Maxwell,6,11,0,0,54.55,6,1,19,22,1,7.33,,19,3,1,0,305,GJ Maxwell,Delhi Daredevils
+Ankit Sharma,18,13,0,2,138.46,6,3,147,166,4,6.87,41.5,36.75,24.17,2,0,314,Ankit Sharma,Deccan Chargers
+SK Trivedi,5,6,0,0,83.33,5,0,324,380,13,7.31,29.23,24.92,52,9,3,39,SK Trivedi,Rajasthan Royals
+TP Sudhindra,0,0,0,0,,0,0,74,136,1,11.65,,74,11.67,3,1,450,TP Sudhindra,Deccan Chargers
+AN Ahmed,0,0,0,0,,0,0,13,17,0,8.5,,,2,1,0,246,AN Ahmed,Mumbai Indians
+AJ Finch,55,51,8,0,107.84,27.5,2,0,0,0,,,,0,0,0,254,AJ Finch,Delhi Daredevils
+M Morkel,3,5,0,0,60,1.5,2,389,459,25,7.29,18.36,15.56,63,10,1,190,M Morkel,Delhi Daredevils
+AA Chavan,11,8,2,0,137.5,11,1,169,236,7,8.64,33.71,24.14,27.33,5,0,297,AA Chavan,Rajasthan Royals
+Shakib Al Hasan,91,73,6,3,124.66,15.17,6,185,199,12,6.63,16.58,15.42,30,5,0,276,Shakib Al Hasan,Kolkata Knight Riders
+RG Sharma,433,341,39,18,126.98,30.93,14,6,16,0,16,,,1,0,0,57,RG Sharma,Mumbai Indians
+NLTC Perera,4,9,0,0,44.44,4,1,15,27,0,10.8,,,2.5,0,0,280,NLTC Perera,Mumbai Indians
+BB Samantray,2,2,0,0,100,2,0,0,0,0,,,,0,0,0,327,BB Samantray,Deccan Chargers
+A Ashish Reddy,35,29,3,1,120.69,8.75,4,169,237,11,8.72,21.55,15.36,27.17,4,2,325,A Ashish Reddy,Deccan Chargers
+A Singh,0,2,0,0,0,0,1,204,314,10,9.56,31.4,20.4,32.83,7,0,196,A Singh,Rajasthan Royals
+RR Powar,0,0,0,0,,0,0,18,32,0,10.67,,,3,0,0,153,RR Powar,Kings XI Punjab
+Anand Rajan,0,0,0,0,,0,0,76,109,3,9.21,,25.33,11.83,4,1,446,Anand Rajan,Deccan Chargers
+RP Singh,6,12,0,0,50,3,2,260,319,10,7.78,31.9,26,41,12,2,61,RP Singh,Mumbai Indians
+P Kumar,35,29,2,1,120.69,11.67,3,395,434,9,6.89,48.22,43.89,63,17,0,14,P Kumar,Kings XI Punjab
+MJ Clarke,98,94,12,0,104.26,16.33,6,66,70,2,6.36,,33,11,0,0,328,MJ Clarke,Pune Warriors
+N Saini,140,140,16,0,100,14,10,0,0,0,,,,0,0,0,319,N Saini,Kings XI Punjab
+AL Menaria,220,200,14,8,110,20,11,20,23,1,6.91,,20,3.33,0,0,266,AL Menaria,Rajasthan Royals
+CL White,479,319,41,20,150.16,43.55,11,20,27,0,9,,,3,2,0,10,CL White,Deccan Chargers
+SPD Smith,362,262,24,14,138.17,40.22,9,2,5,0,15.15,,,0.33,0,0,306,SPD Smith,Pune Warriors
+IR Jaggi,15,21,0,0,71.43,7.5,2,0,0,0,,,,0,0,0,257,IR Jaggi,Deccan Chargers
+MN Samuels,124,123,7,5,100.81,17.71,7,176,216,8,7.53,27,22,28.67,4,0,307,MN Samuels,Pune Warriors
+DT Christian,145,118,8,6,122.88,29,5,169,236,8,8.74,29.5,21.12,27,7,0,258,DT Christian,Deccan Chargers
+MS Bisla,213,160,16,10,133.12,30.43,7,0,0,0,,,,0,0,0,214,MS Bisla,Kolkata Knight Riders
+RN ten Doeschate,21,21,1,1,100,10.5,2,21,24,1,8,,21,3,3,0,284,RN ten Doeschate,Kolkata Knight Riders
+CA Pujara,17,22,1,1,77.27,5.67,3,0,0,0,,,,0,0,0,203,CA Pujara,Royal Challengers Bangalore
+DS Kulkarni,10,5,2,0,200,10,0,53,64,6,8,,8.83,8,5,0,80,DS Kulkarni,Mumbai Indians
+B Chipli,37,35,3,2,105.71,12.33,3,0,0,0,,,,0,0,0,93,B Chipli,Deccan Chargers
+AC Gilchrist,172,142,21,4,121.13,34.4,5,0,0,0,,,,0,0,0,53,AC Gilchrist,Kings XI Punjab
+WD Parnell,19,27,2,0,70.37,4.75,4,130,131,5,6.24,26.2,26,21,1,3,267,WD Parnell,Pune Warriors
+AB McDonald,47,35,6,2,134.29,23.5,2,61,61,5,6.1,,12.2,10,1,0,198,AB McDonald,Royal Challengers Bangalore
+SS Tiwary,191,167,9,8,114.37,23.88,8,0,0,0,,,,0,0,0,79,SS Tiwary,Royal Challengers Bangalore
+SC Ganguly,268,271,30,4,98.89,17.87,15,61,95,2,9.5,,30.5,10,0,1,1,SC Ganguly,Pune Warriors
+S Badrinath,196,181,23,2,108.29,28,7,0,0,0,,,,0,0,0,23,S Badrinath,Chennai Super Kings
+R Dravid,462,412,63,4,112.14,28.88,16,0,0,0,,,,0,0,0,6,R Dravid,Rajasthan Royals
+Pankaj Singh,0,0,0,0,,0,0,127,170,7,8.1,24.29,18.14,21,1,0,75,Pankaj Singh,Rajasthan Royals
+PJ Sangwan,0,0,0,0,,0,0,25,42,1,10.5,,25,4,1,0,116,PJ Sangwan,Kolkata Knight Riders
+UBT Chand,36,34,2,3,105.88,18,2,0,0,0,,,,0,0,0,262,UBT Chand,Delhi Daredevils
+AD Mascarenhas,14,16,1,0,87.5,4.67,3,97,108,7,6.75,,13.86,16,1,0,137,AD Mascarenhas,Kings XI Punjab
+AC Blizzard,0,3,0,0,0,0,1,0,0,0,,,,0,0,0,289,AC Blizzard,Mumbai Indians
+HV Patel,15,15,1,0,100,7.5,2,249,343,9,8.37,38.11,27.67,41,3,0,311,HV Patel,Royal Challengers Bangalore
+A Mishra,16,20,1,0,80,5.33,3,289,377,13,8.02,29,22.23,47,5,2,136,A Mishra,Deccan Chargers
