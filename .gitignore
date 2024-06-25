@@ -168,3 +168,5 @@ cython_debug/
 
 analysis.ipynb
 temp.ipynb
+ipl-teampicker-main/perfloss.ipynb
+ipl-teampicker-main/results_analysis.ipynb
