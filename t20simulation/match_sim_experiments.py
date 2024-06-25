@@ -25,8 +25,8 @@ class MatchSimulatorExperiment:
 
                 selected_players = self.select_players(our_team)
                 selected_opponents =  self.select_players(opponent_team)
-                our_bowlers = selected_players[selected_players['player_type'] == 'Bowler']
-                opponent_bowlers = selected_opponents[selected_opponents['player_type'] == 'Bowler']
+                our_bowlers = selected_players[selected_players['player_type'] == 'Bowler' | selected_players['player_type'] == 'All-Rounder']
+                opponent_bowlers = selected_opponents[selected_opponents['player_type'] == 'Bowler' | selected_opponents['player_type'] == 'All-Rounder']
                 match = matchSimulator(selected_players, selected_opponents, our_bowlers, opponent_bowlers)
                 target, our_team_wickets, our_team_deliveries = match.simulate_inning_1(True)
                 chase, opponent_wickets,opponent_team_deliveries = match.simulate_inning_2(True, target)
@@ -40,8 +40,8 @@ class MatchSimulatorExperiment:
             for iteration in range(self.num_iterations):
                 selected_players = self.select_players(our_team)
                 selected_opponents =  self.select_players(opponent_team)
-                our_bowlers = selected_players[selected_players['player_type'] == 'Bowler']
-                opponent_bowlers = selected_opponents[selected_opponents['player_type'] == 'Bowler']
+                our_bowlers = selected_players[selected_players['player_type'] == 'Bowler' | selected_players['player_type'] == 'All-Rounder']
+                opponent_bowlers = selected_opponents[selected_opponents['player_type'] == 'Bowler' | selected_opponents['player_type'] == 'All-Rounder']
                 match = matchSimulator(selected_players, selected_opponents, our_bowlers, opponent_bowlers)
                 target, opponent_team_wickets, opponent_team_deliveries = match.simulate_inning_1(False)
                 chase, our_team_wickets, our_team_deliveries = match.simulate_inning_2(False, target)

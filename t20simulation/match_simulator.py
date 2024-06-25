@@ -15,7 +15,7 @@ class MatchSimulator:
     # Random
     rng : np.random.Generator = np.random.default_rng()
 
-    def __init__(self, team1 : np.ndarray[int], team2: np.ndarray[int], team1_bowling_lineup : np.ndarray[int], team2_bowling_lineup : np.ndarray[int]):
+    def __init__(self, team1 : np.ndarray[int], team2: np.ndarray[int], team1_bowling_lineup : np.ndarray[int] = np.array([-1,-1,-1,-1,-1]), team2_bowling_lineup : np.ndarray[int] = np.array([-1,-1,-1,-1,-1])):
         """
         This function initializes the MatchSimulator object.
 
@@ -53,7 +53,7 @@ class MatchSimulator:
         ball_number = 1
         runs = 0
 
-        bowler_counter = {key: 0 for key in self.team1_bowling_lineup}
+        bowler_counter = np.array([0]*len(self.team1_bowling_lineup))
         bowlers = self.team1_bowling_lineup.copy()
 
         if team1_is_batting:
@@ -63,12 +63,11 @@ class MatchSimulator:
 
         on_strike = batting_order[0]
         off_strike = batting_order[1]
-        current_bowler = self.rng.choice(bowlers)
+        cur_bowler_index = self.rng.integers(0, len(bowlers))
+        current_bowler = self.team1_bowling_lineup[cur_bowler_index]
 
         while wickets < 10 and ball_number < 120:
             over = (ball_number - 1) // 6
-
-
 
             # Extra
             if self.rng.random() < self.extra_prob:
@@ -76,7 +75,7 @@ class MatchSimulator:
                 continue
 
             # Get the probabilities of each outcome
-            p = self.helper.get_batting_probabilities_against_bowler(on_strike, over, wickets, current_bowler)
+            p = self.helper.get_batting_probabilities_against_bowler(on_strike, current_bowler, over, wickets)
 
             # Get the outcome
             outcome = self.rng.choice(8, p=p)
@@ -93,10 +92,12 @@ class MatchSimulator:
             # If it is the last ball of the over, change who is on strike and change the bowler
             if ball_number % 6  == 0:
                 on_strike, off_strike = off_strike, on_strike
-                bowler_counter[current_bowler] += 1
-                if bowler_counter[current_bowler] == 4:
-                    bowlers.remove(current_bowler)
-                current_bowler = self.rng.choice(bowlers)
+                bowler_counter[cur_bowler_index] += 1
+                if bowler_counter[cur_bowler_index] == 4:
+                    bowlers = np.delete(bowlers, cur_bowler_index)
+                    bowler_counter = np.delete(bowler_counter, cur_bowler_index)
+                cur_bowler_index = self.rng.integers(0, len(bowlers))
+                current_bowler = self.team1_bowling_lineup[cur_bowler_index]
 
             ball_number += 1
 
@@ -115,7 +116,7 @@ class MatchSimulator:
         ball_number = 1
         runs = 0
 
-        bowler_counter = {key: 0 for key in self.team2_bowling_lineup}
+        bowler_counter = np.array([0]*len(self.team2_bowling_lineup))
         bowlers = self.team2_bowling_lineup.copy()
 
         if team2_is_batting:
@@ -125,6 +126,8 @@ class MatchSimulator:
 
         on_strike = batting_order[0]
         off_strike = batting_order[1]
+        cur_bowler_index = self.rng.integers(0, len(bowlers))
+        current_bowler = self.team1_bowling_lineup[cur_bowler_index]
 
         while wickets < 10 and ball_number < 120 and runs < target_score:
             over = (ball_number - 1) // 6
@@ -138,7 +141,7 @@ class MatchSimulator:
             if over == 20:
                 pass
             characteristic_over = self.calculate_over_needed_aggresivness(target_score, runs, over, wickets, on_strike)
-            p = self.helper.get_batting_probabilities_against_bowler(on_strike, characteristic_over, wickets, current_bowler)
+            p = self.helper.get_batting_probabilities_against_bowler(on_strike, current_bowler, characteristic_over, wickets)
 
             # Get the outcome
             outcome = self.rng.choice(8, p=p)
@@ -155,10 +158,12 @@ class MatchSimulator:
             # If it is the last ball of the over, change who is on strike
             if ball_number % 6  == 0:
                 on_strike, off_strike = off_strike, on_strike
-                bowler_counter[current_bowler] += 1
-                if bowler_counter[current_bowler] == 4:
-                    bowlers.remove(current_bowler)
-                current_bowler = self.rng.choice(bowlers)
+                bowler_counter[cur_bowler_index] += 1
+                if bowler_counter[cur_bowler_index] == 4:
+                    bowlers = np.delete(bowlers, cur_bowler_index)
+                    bowler_counter = np.delete(bowler_counter, cur_bowler_index)
+                cur_bowler_index = self.rng.integers(0, len(bowlers))
+                current_bowler = self.team1_bowling_lineup[cur_bowler_index]
 
             ball_number += 1
 

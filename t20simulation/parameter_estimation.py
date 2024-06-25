@@ -27,6 +27,19 @@ class ParameterSampler():
                 p_i70j = pickle.load(f)
                 self.p_i70j = p_i70j
 
+    def get_probability_simple(self, batter : int, over, wicket) -> float:
+        """
+        This function returns the probabilities associated with batting outcomes for a certain batter at a game stage,
+        which is the current over of play and the number of wickets that have fallen.
+
+        Args:
+            batter (int): The batter index.
+        Returns:
+            float: The probability of the outcome.
+        """
+
+        baselines = self.simple_baselines(batter)
+        return self.taus[over, wicket, :] * baselines / np.sum(self.taus[over, wicket] * baselines)
 
     def get_probability(self, batter : int, over : int, wickets : int) -> float:
         """
