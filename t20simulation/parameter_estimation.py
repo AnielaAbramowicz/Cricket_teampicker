@@ -14,6 +14,7 @@ class ParameterSampler():
         self.a_j = None
         self.num_iterations = num_iterations
         self.burn_in = burn_in
+        self.for_batters = for_batters
         self.p_i70j = np.full((outcomes.shape[0], outcomes.shape[3]), -1)
 
     def initialize(self):
@@ -40,7 +41,7 @@ class ParameterSampler():
         """
 
         # We check if the parameters have been sampled for this batter, if not we sample them
-        if self.p_i70j[batter, 0] == -1:
+        if self.p_i70j[batter, 0] == -1 and batter != -1:
             self.p_i70j = self.sample_parameters(batter)
 
         return self.taus[over, wickets, :] * self.p_i70j[batter, :] / np.sum(self.taus[over, wickets] * self.p_i70j[batter])
@@ -53,6 +54,12 @@ class ParameterSampler():
         return result
 
     def sample_parameters(self, batter : int) -> np.ndarray:
+        # Handle the case where the batter id is -1,
+        # which indicates that we want the baselines of an average player
+        # which is just a_j/sum(a_j) i think
+        if batter == -1:
+            return self.a_j / np.sum(self.a_j)
+
         result = self.metropolis_within_gibbs(batter)
         return result
 
@@ -203,7 +210,10 @@ class ParameterSampler():
         """
 
         numerator = np.prod((p) ** self.calc_exponents(batter))
-        denominator = np.prod([np.sum(self.taus[o, w,  :] * p) ** np.sum(self.outcomes[batter, o, w, :]) for o in range(self.outcomes.shape[1]) for w in range(self.outcomes.shape[2])])
+        if batter == -1:
+            denominator = 1.0
+        else:
+            denominator = np.prod([np.sum(self.taus[o, w,  :] * p) ** np.sum(self.outcomes[batter, o, w, :]) for o in range(self.outcomes.shape[1]) for w in range(self.outcomes.shape[2])])
 
         if numerator == 0:
             print("Numerator is 0")
@@ -220,6 +230,9 @@ class ParameterSampler():
         Returns:
             float: The calculated denominator of the joint probability.
         """
+        if batter == -1:
+            return 1.0
+
         denominator = np.prod([np.sum(self.taus[o, w,  :] * p) ** np.sum(self.outcomes[batter, o, w, :]) for o in range(self.outcomes.shape[1]) for w in range(self.outcomes.shape[2])])
         return denominator
 
@@ -250,6 +263,7 @@ class ParameterSampler():
                     for outcome in range(self.outcomes.shape[3]):
                         denominator += self.outcomes[batter, over, wickets, outcome] / self.taus[over, wickets, outcome]
                     numerator += self.outcomes[batter, over, wickets] / self.taus[over, wickets]
+
         a_j = self.c * numerator / denominator
         self.a_j = a_j
 
@@ -300,9 +314,10 @@ class ParameterSampler():
             float: The exponent used in the joint probability calculation for the specified batting outcome.
         """
         exp = 0.0
-        for over in range(self.outcomes.shape[1]):
-            for wicket in range(self.outcomes.shape[2]):
-                    exp += self.outcomes[batter, over, wicket, outcome]
+        if batter != -1:
+            for over in range(self.outcomes.shape[1]):
+                for wicket in range(self.outcomes.shape[2]):
+                        exp += self.outcomes[batter, over, wicket, outcome]
         exp += (self.a_j[outcome] - 1)
         return exp
 
@@ -315,10 +330,13 @@ class ParameterSampler():
         Returns:
             np.array[float]: The exponents used in the joint probability calculation for each batting outcome.
         """
+
         exp = np.zeros(self.outcomes.shape[3])
-        for over in range(self.outcomes.shape[1]):
-            for wicket in range(self.outcomes.shape[2]):
-                exp += self.outcomes[batter, over, wicket, :]
+
+        if batter != -1:
+            for over in range(self.outcomes.shape[1]):
+                for wicket in range(self.outcomes.shape[2]):
+                    exp += self.outcomes[batter, over, wicket, :]
 
         if with_alpha:
             #exp += (self.a_j - 1)

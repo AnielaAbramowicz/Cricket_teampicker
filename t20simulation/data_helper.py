@@ -62,9 +62,13 @@ class SimDataHelper:
         self.taus = self.__calculate_taus_semi_compressed()
         self.taus_is_initialized = True
 
-        self.p_sampler = ParameterSampler(60, 500, 100, self.batter_outcomes_matrix, self.taus)
-        print("Sampling parameters...")
-        self.p_sampler.initialize()
+        self.batter_sampler = ParameterSampler(60, 500, 100, self.batter_outcomes_matrix, self.taus, for_batters=True)
+        #print("Sampling parameters...")
+        self.batter_sampler.initialize()
+
+        self.bowler_sampler = ParameterSampler(60, 500, 100, self.bowler_outcome_matrix, self.taus, for_batters=False)
+        self.bowler_sampler.initialize()
+
         self.baselines_is_initialized = True
 
         self.is_initialized = True
@@ -77,8 +81,26 @@ class SimDataHelper:
             batters (list): A list of batter IDs
         """
 
-        self.p_sampler.load_batter_baselines(batters)
+        self.batter_sampler.load_batter_baselines(batters)
 
+    def get_batting_probabilities_against_bowler(self, batter, bowler, over, wicket):
+        """
+        This function returns the probabilities associated with batting outcomes for a certain batter against a certain bowler at a game stage,
+        which is the current over of play and the number of wickets that have fallen.
+        
+        Args:
+            batter (int): The batter index.
+            bowler (int): The bowler index.
+            over (int): The over index.
+            wickets (int): The wickets index.
+            
+        Returns:
+            float: The probability of the outcome.
+        """
+
+        assert self.baselines_is_initialized, 'Parameter sampler has not been initialized.'
+
+        return self.batter_sampler.get_probability(batter, over, wicket) + self.bowler_sampler.get_probability(bowler, over, wicket) - self.batter_sampler.get_probability(-1, over, wicket)
 
     def get_batting_probabilities(self, batter, over, wicket):
         """
@@ -95,7 +117,7 @@ class SimDataHelper:
 
         assert self.baselines_is_initialized, 'Parameter sampler has not been initialized.'
 
-        return self.p_sampler.get_probability(batter, over, wicket)
+        return self.batter_sampler.get_probability(batter, over, wicket)
 
 
     def get_outcomes_for_batter(self, batter : int) -> np.ndarray:

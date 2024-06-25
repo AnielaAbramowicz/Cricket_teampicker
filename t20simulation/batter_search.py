@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import numpy as np
 
 def same_person(name1, name2, exact=False):
     if exact:
@@ -22,9 +23,9 @@ def get_batter_ids(batter_names, batter_file):
     batter_ids = batter_ids.drop_duplicates()
     batter_ids.set_index('batter', inplace=True)
 
-    ids = []
+    ids = np.full(len(batter_names), -1)
 
-    for b1 in batter_names:
+    for i, b1 in enumerate(batter_names):
         found_id = -1
         for b2 in batter_ids.index:
             if b1 == b2:
@@ -35,9 +36,7 @@ def get_batter_ids(batter_names, batter_file):
                 if found_id != -1:
                     print("Multiple batters found for", b1)
                 found_id = batter_ids.loc[b2]['batter id']
-        if found_id == -1:
-            print('No batter found for', b1)
-        ids.append(found_id)
+        ids[i] = found_id
 
     return ids
 

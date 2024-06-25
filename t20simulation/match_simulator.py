@@ -43,7 +43,6 @@ class MatchSimulator:
         self.duckwort_lewis_table = pd.read_csv(os.path.join(self.path, 'duckworth_lewis.csv')) #replace with actual path 
         print('Initializing...')
         self.helper.initialize()
-        self.helper.load_batter_baselines(np.concatenate((team1, team2)))
         print('Done.')
 
     def simulate_inning_1(self, team1_is_batting):
