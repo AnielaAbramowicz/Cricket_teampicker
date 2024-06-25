@@ -15,7 +15,7 @@ class MatchSimulator:
     # Random
     rng : np.random.Generator = np.random.default_rng()
 
-    def __init__(self, team1 : np.ndarray[int], team2: np.ndarray[int]):
+    def __init__(self, team1 : np.ndarray[int], team2: np.ndarray[int], team1_bowling_lineup : np.ndarray[int], team2_bowling_lineup : np.ndarray[int]):
         """
         This function initializes the MatchSimulator object.
 
@@ -39,16 +39,22 @@ class MatchSimulator:
 
         self.current_batter = None # i think we need to have this aswell
 
+        self.team1_bowling_lineup = team1_bowling_lineup
+        self.team2_bowling_lineup = team2_bowling_lineup
+
         self.helper = SimDataHelper()
         self.duckwort_lewis_table = pd.read_csv(os.path.join(self.path, 'duckworth_lewis.csv')) #replace with actual path 
         print('Initializing...')
         self.helper.initialize()
         print('Done.')
 
-    def simulate_inning_1(self, team1_is_batting):
+    def simulate_inning_1(self, team1_is_batting : bool):
         wickets = 0
         ball_number = 1
         runs = 0
+
+        bowler_counter = {key: 0 for key in self.team1_bowling_lineup}
+        bowlers = self.team1_bowling_lineup.copy()
 
         if team1_is_batting:
             batting_order = self.team1
@@ -57,9 +63,12 @@ class MatchSimulator:
 
         on_strike = batting_order[0]
         off_strike = batting_order[1]
+        current_bowler = self.rng.choice(bowlers)
 
         while wickets < 10 and ball_number < 120:
             over = (ball_number - 1) // 6
+
+
 
             # Extra
             if self.rng.random() < self.extra_prob:
@@ -67,7 +76,7 @@ class MatchSimulator:
                 continue
 
             # Get the probabilities of each outcome
-            p = self.helper.get_batting_probabilities(on_strike, over, wickets)
+            p = self.helper.get_batting_probabilities_against_bowler(on_strike, over, wickets, current_bowler)
 
             # Get the outcome
             outcome = self.rng.choice(8, p=p)
@@ -81,9 +90,13 @@ class MatchSimulator:
             else:
                 runs += outcome
 
-            # If it is the last ball of the over, change who is on strike
+            # If it is the last ball of the over, change who is on strike and change the bowler
             if ball_number % 6  == 0:
                 on_strike, off_strike = off_strike, on_strike
+                bowler_counter[current_bowler] += 1
+                if bowler_counter[current_bowler] == 4:
+                    bowlers.remove(current_bowler)
+                current_bowler = self.rng.choice(bowlers)
 
             ball_number += 1
 
@@ -101,6 +114,9 @@ class MatchSimulator:
         wickets = 0
         ball_number = 1
         runs = 0
+
+        bowler_counter = {key: 0 for key in self.team2_bowling_lineup}
+        bowlers = self.team2_bowling_lineup.copy()
 
         if team2_is_batting:
             batting_order = self.team2
@@ -122,7 +138,7 @@ class MatchSimulator:
             if over == 20:
                 pass
             characteristic_over = self.calculate_over_needed_aggresivness(target_score, runs, over, wickets, on_strike)
-            p = self.helper.get_batting_probabilities(on_strike, characteristic_over, wickets)
+            p = self.helper.get_batting_probabilities_against_bowler(on_strike, characteristic_over, wickets, current_bowler)
 
             # Get the outcome
             outcome = self.rng.choice(8, p=p)
@@ -139,6 +155,10 @@ class MatchSimulator:
             # If it is the last ball of the over, change who is on strike
             if ball_number % 6  == 0:
                 on_strike, off_strike = off_strike, on_strike
+                bowler_counter[current_bowler] += 1
+                if bowler_counter[current_bowler] == 4:
+                    bowlers.remove(current_bowler)
+                current_bowler = self.rng.choice(bowlers)
 
             ball_number += 1
 
