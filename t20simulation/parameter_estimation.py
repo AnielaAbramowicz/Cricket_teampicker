@@ -267,7 +267,7 @@ class ParameterSampler():
             return self.a_j
 
         # Check if pickled
-        a_j_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "a_j.pkl")
+        a_j_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "pickle_jar/a_j.pkl")
         if os.path.exists(a_j_file):
             with open(a_j_file, 'rb') as f:
                 a_j = pickle.load(f)

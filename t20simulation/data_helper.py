@@ -38,8 +38,8 @@ class SimDataHelper:
     baselines_is_initialized = False
 
     def __init__(self):
-        self.batter_file = pd.read_csv(os.path.join(path, 'batter_runs.csv'))
-        self.bowler_file = pd.read_csv(os.path.join(path, 'bowler_runs.csv'))
+        self.batter_file = pd.read_csv(os.path.join(path, 'data/batter_runs.csv'))
+        self.bowler_file = pd.read_csv(os.path.join(path, 'data/bowler_runs.csv'))
         self.num_batters = len(self.batter_file['batter id'].unique())
         self.num_bowlers = len(self.bowler_file['bowler id'].unique())
 

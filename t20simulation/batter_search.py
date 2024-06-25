@@ -1,3 +1,8 @@
+"""
+This file contains functions to search for batters and bowlers in the batter_runs.csv and bowler_runs.csv files respectively.
+I created just to help out with some stuff, the code quality is meh.
+"""
+
 import pandas as pd
 import os
 import numpy as np

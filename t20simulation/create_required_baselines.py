@@ -1,3 +1,7 @@
+"""
+This file was used to calculate parameters for only the players we needed to calculate ERD for.
+"""
+
 from data_helper import SimDataHelper
 import numpy as np
 import pandas as pd
