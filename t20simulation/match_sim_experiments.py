@@ -7,14 +7,42 @@ import numpy as np
 
 class MatchSimulatorExperiment:
 
-    def __init__(self) -> None:
+    def __init__(self, num_iterations : int) -> None:
         self.player_data = pd.read_csv('all_players.csv') #TODO: replace with actual path NATE
         self.rng = np.random.default_rng()
+        self.num_iterations = num_iterations
 
-    def initialize(self, opponent_teams : np.ndarray[np.ndarrays[int]], our_team : np.ndarray_int) -> None:
-        print('Initializing...')
-
-        print('Done.')
+    def run_experiments(self, opponent_teams : np.ndarray[np.ndarrays[int]], our_team : np.ndarray_int) -> dict[np.ndarray[int], dict[np.ndarray[int], int]]:
+        """
+        This function runs the experiments for the match simulator
+        param opponent_teams: np.ndarray[np.ndarray[int]]: The teams that we are playing against
+        param our_team: np.ndarray[int]: The team that we are playing with
+        """
+        results = {}
+        for opponent_team in opponent_teams:
+            result = {our_team: 0, opponent_team: 0} #stores the number of wins for each team
+            match = matchSimulator(our_team, opponent_team)
+            for iteration in range(self.num_iterations):
+                target, our_team_wickets, our_team_deliveries = match.simulate_inning_1(True)
+                chase, opponent_wickets,opponent_team_deliveries = match.simulate_inning_2(True, target)
+                if chase < target:
+                    result[our_team] += 2
+                elif chase > target:
+                    result[opponent_team] += 2
+                else :
+                    result[our_team] += 1
+                    result[opponent_team] += 1
+            for iteration in range(self.num_iterations):
+                target, opponent_team_wickets, opponent_team_deliveries = match.simulate_inning_1(False)
+                chase, our_team_wickets, our_team_deliveries = match.simulate_inning_2(False, target)
+                if chase < target:
+                    result[our_team] += 2
+                elif chase > target:
+                    result[opponent_team] += 2
+                else :
+                    result[our_team] += 1
+                    result[opponent_team] += 1
+            results[opponent_team] = result
 
     def select_players(self, players : np.ndarary[int]) -> np.ndarray[int]:
         """
